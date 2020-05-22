@@ -34,5 +34,4 @@ public class Identity extends JsonBean {
 	public String getName() {
 		return this.json.getString("name");
 	}
-	
 }

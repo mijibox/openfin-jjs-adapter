@@ -18,6 +18,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentHashMap.KeySetView;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.json.Json;
@@ -25,6 +26,7 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 
+import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,17 +37,21 @@ public class OpenFinConnection implements Listener {
 	CompletableFuture<?> accumulatedMessage = new CompletableFuture<>();
 	AtomicInteger messageId = new AtomicInteger(0);
 	ConcurrentHashMap<Integer, CompletableFuture<Ack>> ackMap = new ConcurrentHashMap<>();
-
+	
+	
 	private int port;
 
 	private WebSocket webSocket;
 
 	private String uuid;
-	private CompletableFuture<OpenFinConnection> authFuture = new CompletableFuture<>();;
+	private CompletableFuture<OpenFinConnection> authFuture = new CompletableFuture<>();
+
+	private KeySetView<MessageProcessor, Boolean> messageProcessors;
 
 	public OpenFinConnection(String uuid, int port) {
 		this.uuid = uuid;
 		this.port = port;
+		this.messageProcessors = ConcurrentHashMap.newKeySet();
 	}
 	
 	public String getUuid() {
@@ -147,11 +153,8 @@ public class OpenFinConnection implements Listener {
 				ReadableByteChannel readableByteChannel = Channels.newChannel(defaultHtml.openStream());
 				Path tempFile = Files.createTempFile(null, ".html");
 				FileOutputStream fileOutputStream = new FileOutputStream(tempFile.toFile());
-				long size = fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+				fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
 				fileOutputStream.close();
-				
-				System.out.println("defaultHtml: " + tempFile.toString());
-
 				this.startApplication("__default_" + this.uuid, tempFile.toUri().toString())
 						.thenAcceptAsync(app -> {
 							this.authFuture.complete(this);
@@ -175,6 +178,11 @@ public class OpenFinConnection implements Listener {
 			}
 //			ackFuture.completeOnTimeout(new Ack(payload), 60, TimeUnit.SECONDS);
 		}
+		else if ("process-message".equals(action)) {
+			this.messageProcessors.forEach(p->{
+				p.processMessage(payload);
+			});
+		}
 		else {
 			
 		}
@@ -197,6 +205,14 @@ public class OpenFinConnection implements Listener {
 				throw new RuntimeException("error startApplication, reason: " + ack.getReason());
 			}
 		});
+	}
+
+	public void addMessageProcessor(MessageProcessor processor) {
+		this.messageProcessors.add(processor);
+	}
+	
+	public void removeMessageProcessor(MessageProcessor processor) {
+		this.messageProcessors.remove(processor);
 	}
 
 }

@@ -4,7 +4,10 @@
 
 let objectMap = new Map();
 
+let objId = 0;
+
 function setObject(id, obj) {
+	console.log("cache object, id=" + id + ", obj=" + JSON.stringify(obj));
 	objectMap.set(id, obj);
 }
 
@@ -29,15 +32,15 @@ function invokeInstanceMethod(obj, method, ...args) {
 }
 
 async function createWindow() {
-    const winOption = {
-        name:'child',
-        defaultWidth: 300,
-        defaultHeight: 300,
-        url: 'https://cdn.openfin.co/docs/javascript/stable/tutorial-Window.create.html',
-        frame: true,
-        autoShow: true
-    };
-    return await fin.Window.create(winOption);
+	const winOption = {
+		name:'child',
+		defaultWidth: 300,
+		defaultHeight: 300,
+		url: 'https://cdn.openfin.co/docs/javascript/stable/tutorial-Window.create.html',
+		frame: true,
+		autoShow: true
+	};
+	return await fin.Window.create(winOption);
 }
 
 
@@ -46,6 +49,20 @@ if (fin !== 'undefined') {
 	fin.InterApplicationBus.subscribe({uuid: '*'}, 'echo', (msg, srcIdentity) => {
 		console.log("received message from: " + JSON.stringify(srcIdentity) + ", message: " + JSON.stringify(msg));
 		invokeMethod("fin.InterApplicationBus.send", srcIdentity, 'echo', msg);
+	});
+
+	fin.InterApplicationBus.subscribe({uuid: '*'}, '__OpenFinAPIExecutor__', (msg, srcIdentity) => {
+		console.log("received message from: " + JSON.stringify(srcIdentity) + ", message: " + JSON.stringify(msg));
+		Promise.resolve(invokeMethod(msg.method)).then(result=>{
+			console.log("invokeMethod: " + msg.method + ", got result: " + JSON.stringify(result));
+			let resultPayload = {"msgId":msg.msgId, "execResult": result};
+			if (msg.cacheResultObj) {
+				let resultObjId = objId++;
+				setObject(resultObjId, result);
+				resultPayload.resultObjectId = resultObjId;
+			}
+			fin.InterApplicationBus.send(srcIdentity, '__OpenFinAPIExecutor__', resultPayload);
+		});
 	});
 	
 	fin.Window.getCurrent().then(w=>{

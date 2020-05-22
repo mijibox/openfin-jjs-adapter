@@ -1,7 +1,7 @@
 package com.mijibox.openfinjjs;
 
-import javax.json.JsonObject;
+import javax.json.JsonValue;
 
 public interface OpenFinIABMessageListener {
-	public void onMessage(JsonObject payload);
+	public void onMessage(Identity sourceIdentity, JsonValue jsonValue);
 }
