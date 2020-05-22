@@ -147,25 +147,10 @@ public class OpenFinConnection implements Listener {
 			}
 		}
 		else if ("authorization-response".equals(action)) {
-			try {
-				URL defaultHtml = this.getClass().getClassLoader().getResource("default.html");
-				//copy the content to temp directory
-				ReadableByteChannel readableByteChannel = Channels.newChannel(defaultHtml.openStream());
-				Path tempFile = Files.createTempFile(null, ".html");
-				FileOutputStream fileOutputStream = new FileOutputStream(tempFile.toFile());
-				fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
-				fileOutputStream.close();
-				this.startApplication("__default_" + this.uuid, tempFile.toUri().toString())
-						.thenAcceptAsync(app -> {
-							this.authFuture.complete(this);
-						});
-			}
-			catch (IOException e) {
-				e.printStackTrace();
-			}
-			finally {
-				
-			}
+			this.createDefaultApplication()
+			.thenAcceptAsync(app -> {
+				this.authFuture.complete(this);
+			});
 		}
 		else if ("ack".equals(action)) {
 			int correlationId = receivedJson.getInt("correlationId");
@@ -188,23 +173,43 @@ public class OpenFinConnection implements Listener {
 		}
 	}
 	
-	public CompletionStage<OpenFinApplication> startApplication(String appUuid, String url) {
-		logger.info("startApplication, uuid={}, url={}", appUuid, url);
-		var appOpts = Json.createObjectBuilder()
-				.add("uuid", appUuid)
-				.add("url", url)
-				.add("autoShow", true).build();
+	public String getDefaultApplicationUuid() {
+		return this.uuid + "-default";
+	}
+	
+	private CompletionStage<OpenFinApplication> createDefaultApplication() {
+		try {
+			logger.info("createDefaultApplication");
+			URL defaultHtml = this.getClass().getClassLoader().getResource("default.html");
+			//copy the content to temp directory
+			ReadableByteChannel readableByteChannel = Channels.newChannel(defaultHtml.openStream());
+			Path tempFile = Files.createTempFile(null, ".html");
+			FileOutputStream fileOutputStream = new FileOutputStream(tempFile.toFile());
+			fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+			fileOutputStream.close();
+			var appUuid = getDefaultApplicationUuid();
+			var appOpts = Json.createObjectBuilder()
+					.add("uuid", appUuid)
+					.add("url", tempFile.toUri().toString())
+					.add("autoShow", true).build();
 
-		return this.sendMessage("create-application", appOpts).thenComposeAsync(ack -> {
-			return this.sendMessage("run-application", Json.createObjectBuilder().add("uuid", appUuid).build());
-		}).thenApplyAsync(ack->{
-			if (ack.isSuccess()) {
-				return new OpenFinApplication();
-			}
-			else {
-				throw new RuntimeException("error startApplication, reason: " + ack.getReason());
-			}
-		});
+			return this.sendMessage("create-application", appOpts).thenComposeAsync(ack -> {
+				return this.sendMessage("run-application", Json.createObjectBuilder().add("uuid", appUuid).build());
+			}).thenApplyAsync(ack->{
+				if (ack.isSuccess()) {
+					return null;
+				}
+				else {
+					throw new RuntimeException("error startApplication, reason: " + ack.getReason());
+				}
+			});
+		}
+		catch (IOException e) {
+			throw new RuntimeException("error createDefaultApplication", e);
+		}
+		finally {
+			
+		}
 	}
 
 	public void addMessageProcessor(MessageProcessor processor) {

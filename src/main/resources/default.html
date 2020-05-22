@@ -1,78 +1,78 @@
 <html>
 <head>
 <script type="text/javascript">
+var openFinApiExecutor = (function() {
+	let objectMap = new Map();
+	let objId = 1;
 
-let objectMap = new Map();
-
-let objId = 0;
-
-function setObject(id, obj) {
-	console.log("cache object, id=" + id + ", obj=" + JSON.stringify(obj));
-	objectMap.set(id, obj);
-}
-
-function getObject(id) {
-	return objectMap.get(id);	
-}
-
-function deleteObject(id) {
-	objectMap.delete(id);
-}
-
-function invokeMethod(method, ...args) {
-	return invokeInstanceMethod(null, method, ...args);
-}
-
-function invokeInstanceMethod(obj, method, ...args) {
-	if (obj == null) {
-		var nObj = method.substring(0, method.lastIndexOf('.'));
-		obj = eval(nObj); 
+	function setObject(id, obj) {
+		console.log("cache object, id=" + id + ", obj=" + JSON.stringify(obj));
+		objectMap.set(id, obj);
 	}
-	return eval(method).call(obj, ...args);
-}
 
-async function createWindow() {
-	const winOption = {
-		name:'child',
-		defaultWidth: 300,
-		defaultHeight: 300,
-		url: 'https://cdn.openfin.co/docs/javascript/stable/tutorial-Window.create.html',
-		frame: true,
-		autoShow: true
-	};
-	return await fin.Window.create(winOption);
-}
+	function getObject(id) {
+		return objectMap.get(id);	
+	}
 
+	function deleteObject(id) {
+		objectMap.delete(id);
+	}
 
-if (fin !== 'undefined') {
-	console.log("running in OpenFin runtime.");
-	fin.InterApplicationBus.subscribe({uuid: '*'}, 'echo', (msg, srcIdentity) => {
-		console.log("received message from: " + JSON.stringify(srcIdentity) + ", message: " + JSON.stringify(msg));
-		invokeMethod("fin.InterApplicationBus.send", srcIdentity, 'echo', msg);
-	});
-
-	fin.InterApplicationBus.subscribe({uuid: '*'}, '__OpenFinAPIExecutor__', (msg, srcIdentity) => {
-		console.log("received message from: " + JSON.stringify(srcIdentity) + ", message: " + JSON.stringify(msg));
-		Promise.resolve(invokeMethod(msg.method)).then(result=>{
-			console.log("invokeMethod: " + msg.method + ", got result: " + JSON.stringify(result));
-			let resultPayload = {"msgId":msg.msgId, "execResult": result};
-			if (msg.cacheResultObj) {
-				let resultObjId = objId++;
-				setObject(resultObjId, result);
-				resultPayload.resultObjectId = resultObjId;
-			}
-			fin.InterApplicationBus.send(srcIdentity, '__OpenFinAPIExecutor__', resultPayload);
-		});
-	});
+	function invokeMethod(obj, method, ...args) {
+		if (!obj) {
+			console.log("no target object specified");
+			var nObj = method.substring(0, method.lastIndexOf('.'));
+			obj = eval(nObj); 
+			console.log("invoking method: " + method + ", obj: " + JSON.stringify(obj));
+			return eval(method).call(obj, ...args);
+		}
+		else {
+			return eval("obj." + method).call(obj, ...args);
+		}
+	}
 	
-	fin.Window.getCurrent().then(w=>{
-		fin.System.showDeveloperTools(w.identity);
-	});
-	createWindow().then(() => console.log('child window is created')).catch(err => console.log(err));
-}
-else {
-	console.log("not running in OpenFin runtime.");
-}
+	function sendMessage(dest, payload) {
+		fin.InterApplicationBus.send(dest, fin.me.uuid + '-exec', payload);
+	}
+
+	if (fin !== 'undefined') {
+		console.log("running in OpenFin runtime.");
+		fin.InterApplicationBus.subscribe({uuid: '*'}, fin.me.uuid + '-exec', (msg, srcIdentity) => {
+			console.log("received message from: " + JSON.stringify(srcIdentity) + ", message: " + JSON.stringify(msg));
+			let action = msg.action;
+			let messageId = msg.messageId;
+			let payload = msg.payload;
+			if (action == 'ping') {
+				sendMessage(srcIdentity, {action: 'pong', messageId, payload});
+			}
+			else if (action == 'invoke'){
+				let targetObject = null;
+				if (payload.cachedObjId) {
+					targetObject = getObject(payload.cachedObjId);
+				}
+				let args = payload.args || [];
+				console.log("targetObject: " + JSON.stringify(targetObject));
+				Promise.resolve(invokeMethod(targetObject, payload.method, ...args)).then(result=>{
+					console.log("invokeMethod: " + payload.method + ", got result: " + JSON.stringify(result));
+					let resultPayload = {messageId, action: 'invokeResult', "payload": result};
+					if (payload.cacheResultObj) {
+						let resultObjId = objId++;
+						setObject(resultObjId, result);
+						resultPayload.resultObjectId = resultObjId;
+					}
+					sendMessage(srcIdentity, resultPayload);
+				});
+			}
+		});
+		
+		fin.Window.getCurrent().then(w=>{
+			fin.System.showDeveloperTools(w.identity);
+		});
+	}
+	else {
+		console.log("not running in OpenFin runtime.");
+	}
+}());
 </script>
 </head>
 <body>
