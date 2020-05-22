@@ -1,28 +1,29 @@
 package com.mijibox.openfinjjs;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.WebSocket;
 import java.net.http.WebSocket.Listener;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
-import javax.json.JsonValue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,6 +111,7 @@ public class OpenFinConnection implements Listener {
 		String msg = msgJson.toString();
 		logger.info("sending: {}", msg);
 		return this.webSocket.sendText(msg, true).thenCombineAsync(ackFuture, (ws, ack) -> {
+			logger.info("msg[{}] got ack: {}", msgId, ack);
 			return ack;
 		});
 
@@ -139,17 +141,62 @@ public class OpenFinConnection implements Listener {
 			}
 		}
 		else if ("authorization-response".equals(action)) {
-			this.authFuture.complete(this);
+			try {
+				URL defaultHtml = this.getClass().getClassLoader().getResource("default.html");
+				//copy the content to temp directory
+				ReadableByteChannel readableByteChannel = Channels.newChannel(defaultHtml.openStream());
+				Path tempFile = Files.createTempFile(null, ".html");
+				FileOutputStream fileOutputStream = new FileOutputStream(tempFile.toFile());
+				long size = fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+				fileOutputStream.close();
+				
+				System.out.println("defaultHtml: " + tempFile.toString());
+
+				this.startApplication("__default_" + this.uuid, tempFile.toUri().toString())
+						.thenAcceptAsync(app -> {
+							this.authFuture.complete(this);
+						});
+			}
+			catch (IOException e) {
+				e.printStackTrace();
+			}
+			finally {
+				
+			}
 		}
 		else if ("ack".equals(action)) {
 			int correlationId = receivedJson.getInt("correlationId");
-			CompletableFuture<Ack> ackFuture = this.ackMap.get(correlationId);
-			ackFuture.complete(new Ack(payload));
+			CompletableFuture<Ack> ackFuture = this.ackMap.remove(correlationId);
+			if (ackFuture == null) {
+				logger.error("missing ackFuture, correlationId={}", correlationId);
+			}
+			else {
+				ackFuture.complete(new Ack(payload));
+			}
 //			ackFuture.completeOnTimeout(new Ack(payload), 60, TimeUnit.SECONDS);
 		}
 		else {
 			
 		}
+	}
+	
+	public CompletionStage<OpenFinApplication> startApplication(String appUuid, String url) {
+		logger.info("startApplication, uuid={}, url={}", appUuid, url);
+		var appOpts = Json.createObjectBuilder()
+				.add("uuid", appUuid)
+				.add("url", url)
+				.add("autoShow", true).build();
+
+		return this.sendMessage("create-application", appOpts).thenComposeAsync(ack -> {
+			return this.sendMessage("run-application", Json.createObjectBuilder().add("uuid", appUuid).build());
+		}).thenApplyAsync(ack->{
+			if (ack.isSuccess()) {
+				return new OpenFinApplication();
+			}
+			else {
+				throw new RuntimeException("error startApplication, reason: " + ack.getReason());
+			}
+		});
 	}
 
 }

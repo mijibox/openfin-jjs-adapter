@@ -1,0 +1,64 @@
+<html>
+<head>
+<script type="text/javascript">
+
+let objectMap = new Map();
+
+function setObject(id, obj) {
+	objectMap.set(id, obj);
+}
+
+function getObject(id) {
+	return objectMap.get(id);	
+}
+
+function deleteObject(id) {
+	objectMap.delete(id);
+}
+
+function invokeMethod(method, ...args) {
+	return invokeInstanceMethod(null, method, ...args);
+}
+
+function invokeInstanceMethod(obj, method, ...args) {
+	if (obj == null) {
+		var nObj = method.substring(0, method.lastIndexOf('.'));
+		obj = eval(nObj); 
+	}
+	return eval(method).call(obj, ...args);
+}
+
+async function createWindow() {
+    const winOption = {
+        name:'child',
+        defaultWidth: 300,
+        defaultHeight: 300,
+        url: 'https://cdn.openfin.co/docs/javascript/stable/tutorial-Window.create.html',
+        frame: true,
+        autoShow: true
+    };
+    return await fin.Window.create(winOption);
+}
+
+
+if (fin !== 'undefined') {
+	console.log("running in OpenFin runtime.");
+	fin.InterApplicationBus.subscribe({uuid: '*'}, 'echo', (msg, srcIdentity) => {
+		console.log("received message from: " + JSON.stringify(srcIdentity) + ", message: " + JSON.stringify(msg));
+		invokeMethod("fin.InterApplicationBus.send", srcIdentity, 'echo', msg);
+	});
+	
+	fin.Window.getCurrent().then(w=>{
+		fin.System.showDeveloperTools(w.identity);
+	});
+	createWindow().then(() => console.log('child window is created')).catch(err => console.log(err));
+}
+else {
+	console.log("not running in OpenFin runtime.");
+}
+</script>
+</head>
+<body>
+	<h4>OpenFin Java-JavaScript Adapter</h4>
+</body>
+</html>

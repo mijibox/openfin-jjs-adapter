@@ -63,9 +63,11 @@ public class OpenFinRVMLauncher {
 			BufferedInputStream bis = new BufferedInputStream(url.openStream());
 			v = new String(bis.readAllBytes());
 			logger.info("Got RVM latestVersion: {}", v);
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			e.printStackTrace();
-		} finally {
+		}
+		finally {
 
 		}
 		return v;
@@ -86,19 +88,23 @@ public class OpenFinRVMLauncher {
 			fileOutputStream.close();
 			this.extract(tempFile);
 			Files.delete(tempFile);
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			e.printStackTrace();
-		} finally {
+		}
+		finally {
 		}
 	}
 
 	private void extract(Path zipFile) {
 		try {
 			this.unzip(zipFile, "./rvm/" + this.rvmVersion);
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} finally {
+		}
+		finally {
 
 		}
 	}
@@ -114,7 +120,8 @@ public class OpenFinRVMLauncher {
 			if (!entry.isDirectory()) {
 				// if the entry is a file, extracts it
 				extractFile(zipIn, filePath);
-			} else {
+			}
+			else {
 				// if the entry is a directory, make the directory
 				Files.createDirectory(filePath);
 			}
@@ -143,11 +150,10 @@ public class OpenFinRVMLauncher {
 		var jsonRuntime = Json.createObjectBuilder();
 		jsonRuntime.add("version", "stable");
 		jsonRuntime.add("arguments", "--v=1 --runtime-information-channel-v6=" + this.connetionUUID);
-		
+
 		var startUpAppConfig = Json.createObjectBuilder()
-				.add("uuid", "default_" + this.connetionUUID)
-				.add("name", "default_" + this.connetionUUID)
-				.add("url", "https://www.google.com")
+				.add("uuid", "app_" + this.connetionUUID)
+				.add("url", "about:blank")
 				.add("autoShow", true).build();
 
 		var jsonConfig = Json.createObjectBuilder();
@@ -218,7 +224,8 @@ public class OpenFinRVMLauncher {
 
 				pb.start();
 				return pb;
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				e.printStackTrace();
 			}
 			return null;
