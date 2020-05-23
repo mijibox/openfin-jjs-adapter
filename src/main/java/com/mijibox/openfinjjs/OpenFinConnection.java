@@ -19,6 +19,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentHashMap.KeySetView;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.json.Json;
@@ -26,32 +29,36 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 
-import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OpenFinConnection implements Listener {
 	private final static Logger logger = LoggerFactory.getLogger(OpenFinConnection.class);
 
-	StringBuilder receivedMessage = new StringBuilder();
-	CompletableFuture<?> accumulatedMessage = new CompletableFuture<>();
-	AtomicInteger messageId = new AtomicInteger(0);
-	ConcurrentHashMap<Integer, CompletableFuture<Ack>> ackMap = new ConcurrentHashMap<>();
-	
-	
+	private StringBuilder receivedMessage;
+	private CompletableFuture<?> accumulatedMessage;
+	private AtomicInteger messageId;
+	private  ConcurrentHashMap<Integer, CompletableFuture<Ack>> ackMap;
 	private int port;
-
 	private WebSocket webSocket;
-
 	private String uuid;
-	private CompletableFuture<OpenFinConnection> authFuture = new CompletableFuture<>();
-
+	private CompletableFuture<OpenFinConnection> authFuture;
 	private KeySetView<MessageProcessor, Boolean> messageProcessors;
+	private OpenFinApplication defaultApp;
+	private ExecutorService sendMessageThreadPool;
+	private OpenFinInterApplicationBus interAppBus;
 
 	public OpenFinConnection(String uuid, int port) {
 		this.uuid = uuid;
 		this.port = port;
+		this.receivedMessage = new StringBuilder();
+		this.ackMap = new ConcurrentHashMap<>();
+		this.accumulatedMessage = new CompletableFuture<>();
+		this.messageId = new AtomicInteger(0);
+		this.authFuture = new CompletableFuture<>();
 		this.messageProcessors = ConcurrentHashMap.newKeySet();
+		this.sendMessageThreadPool = Executors.newFixedThreadPool(10);
+		this.interAppBus = new OpenFinInterApplicationBus(this);
 	}
 	
 	public String getUuid() {
@@ -60,18 +67,18 @@ public class OpenFinConnection implements Listener {
 	
 	public CompletionStage<OpenFinConnection> connect() {
 		try {
-			
 			String endpointURI = "ws://localhost:" + this.port + "/";
 			HttpClient httpClient = HttpClient.newHttpClient();
 			httpClient.newWebSocketBuilder().buildAsync(new URI(endpointURI), this);
-		} catch (URISyntaxException e) {
+		}
+		catch (URISyntaxException e) {
 			e.printStackTrace();
-		} finally {
-
+		}
+		finally {
 		}
 		return this.authFuture;
 	}
-	
+
 	@Override
 	public void onOpen(WebSocket webSocket) {
 		webSocket.request(1);
@@ -106,25 +113,32 @@ public class OpenFinConnection implements Listener {
 		return accumulatedMessage;
 	}
 	
-	public CompletionStage<Ack> sendMessage(String action, JsonObject payload) {
+	public synchronized CompletionStage<Ack> sendMessage(String action, JsonObject payload) {
 		int msgId = this.messageId.getAndIncrement();
-		JsonObjectBuilder json = Json.createObjectBuilder();
-		JsonObject msgJson = json.add("action", action).add("messageId", msgId).add("payload", payload).build();
-
 		CompletableFuture<Ack> ackFuture = new CompletableFuture<>();
 		this.ackMap.put(msgId, ackFuture);
-
+		JsonObjectBuilder json = Json.createObjectBuilder();
+		JsonObject msgJson = json.add("action", action)
+				.add("messageId", msgId)
+				.add("payload", payload).build();
 		String msg = msgJson.toString();
 		logger.info("sending: {}", msg);
-		return this.webSocket.sendText(msg, true).thenCombineAsync(ackFuture, (ws, ack) -> {
-			logger.info("msg[{}] got ack: {}", msgId, ack);
-			return ack;
-		});
-
+		
+		try {
+			this.webSocket.sendText(msg, true).exceptionally(e->{
+				e.printStackTrace();
+				return null;
+			}).toCompletableFuture().get();
+		}
+		catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
+		
+		return ackFuture;
 	}
 
 	private void processMessage(String message) {
-		logger.info("received: {}", message);
+		logger.info("processMessage: {}", message);
 		JsonReader jsonReader = Json.createReader(new StringReader(message));
 		JsonObject receivedJson = jsonReader.readObject();
 		String action = receivedJson.getString("action");
@@ -148,9 +162,9 @@ public class OpenFinConnection implements Listener {
 		}
 		else if ("authorization-response".equals(action)) {
 			this.createDefaultApplication()
-			.thenAcceptAsync(app -> {
-				this.authFuture.complete(this);
-			});
+					.thenAccept(v -> {
+						this.authFuture.complete(this);
+					});
 		}
 		else if ("ack".equals(action)) {
 			int correlationId = receivedJson.getInt("correlationId");
@@ -161,10 +175,9 @@ public class OpenFinConnection implements Listener {
 			else {
 				ackFuture.complete(new Ack(payload));
 			}
-//			ackFuture.completeOnTimeout(new Ack(payload), 60, TimeUnit.SECONDS);
 		}
 		else if ("process-message".equals(action)) {
-			this.messageProcessors.forEach(p->{
+			this.messageProcessors.forEach(p -> {
 				p.processMessage(payload);
 			});
 		}
@@ -173,34 +186,32 @@ public class OpenFinConnection implements Listener {
 		}
 	}
 	
-	public String getDefaultApplicationUuid() {
+	String getDefaultApplicationUuid() {
 		return this.uuid + "-default";
 	}
 	
-	private CompletionStage<OpenFinApplication> createDefaultApplication() {
+	private CompletionStage<Void> createDefaultApplication() {
 		try {
-			logger.info("createDefaultApplication");
+			String appUuid = getDefaultApplicationUuid();
+			logger.info("createDefaultApplication: {}", appUuid);
 			URL defaultHtml = this.getClass().getClassLoader().getResource("default.html");
-			//copy the content to temp directory
+			// copy the content to temp directory
 			ReadableByteChannel readableByteChannel = Channels.newChannel(defaultHtml.openStream());
 			Path tempFile = Files.createTempFile(null, ".html");
 			FileOutputStream fileOutputStream = new FileOutputStream(tempFile.toFile());
-			fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+			long size = fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
 			fileOutputStream.close();
-			var appUuid = getDefaultApplicationUuid();
-			var appOpts = Json.createObjectBuilder()
+			logger.info("default app html: {}, size: {}", tempFile, size);
+			JsonObject appOpts = Json.createObjectBuilder()
 					.add("uuid", appUuid)
 					.add("url", tempFile.toUri().toString())
 					.add("autoShow", true).build();
 
 			return this.sendMessage("create-application", appOpts).thenComposeAsync(ack -> {
 				return this.sendMessage("run-application", Json.createObjectBuilder().add("uuid", appUuid).build());
-			}).thenApplyAsync(ack->{
-				if (ack.isSuccess()) {
-					return null;
-				}
-				else {
-					throw new RuntimeException("error startApplication, reason: " + ack.getReason());
+			}).thenAcceptAsync(ack -> {
+				if (!ack.isSuccess()) {
+					throw new RuntimeException("error createDefaultApplication, reason: " + ack.getReason());
 				}
 			});
 		}
@@ -208,7 +219,7 @@ public class OpenFinConnection implements Listener {
 			throw new RuntimeException("error createDefaultApplication", e);
 		}
 		finally {
-			
+
 		}
 	}
 
@@ -219,5 +230,9 @@ public class OpenFinConnection implements Listener {
 	public void removeMessageProcessor(MessageProcessor processor) {
 		this.messageProcessors.remove(processor);
 	}
-
+	
+	public OpenFinInterApplicationBus getInterAppBus() {
+		return this.interAppBus;
+	}
+	
 }

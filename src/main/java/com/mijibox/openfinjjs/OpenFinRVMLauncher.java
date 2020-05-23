@@ -148,7 +148,7 @@ public class OpenFinRVMLauncher {
 
 	private Path createStartupConfig() throws IOException {
 		var jsonRuntime = Json.createObjectBuilder();
-		jsonRuntime.add("version", "stable");
+		jsonRuntime.add("version", "canary");
 		jsonRuntime.add("arguments", "--v=1 --runtime-information-channel-v6=" + this.connetionUUID);
 
 		var startUpAppConfig = Json.createObjectBuilder()

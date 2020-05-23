@@ -1,6 +1,5 @@
 package com.mijibox.openfinjjs;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,7 +14,7 @@ public class OpenFinInterApplicationBus implements MessageProcessor {
 	private OpenFinConnection connection;
 	private ConcurrentHashMap<String, CopyOnWriteArrayList<OpenFinIABMessageListener>> listenerMap;
 
-	public OpenFinInterApplicationBus(OpenFinConnection connection) {
+	OpenFinInterApplicationBus(OpenFinConnection connection) {
 		this.connection = connection;
 		this.listenerMap = new ConcurrentHashMap<>();
 		this.connection.addMessageProcessor(this);
@@ -91,16 +90,31 @@ public class OpenFinInterApplicationBus implements MessageProcessor {
 
 	@Override
 	public void processMessage(JsonObject payload) {
+		System.out.println("process IAB message: " + payload);
 		//check if it has subsubscribed topic
 		String sourceUuid = payload.getString("sourceUuid");
 		String sourceWindowName = payload.getString("sourceWindowName");
 		String topic = payload.getString("topic");
 		
 		String key = this.getSubscriptionKey(sourceUuid, sourceWindowName, topic);
+		System.out.println("subkey: " + key);
+		
+		
 		CopyOnWriteArrayList<OpenFinIABMessageListener> listeners = this.listenerMap.get(key);
 		if (listeners != null) {
+			Identity identity = new Identity(sourceUuid, sourceWindowName);
 			listeners.forEach(l -> {
-				l.onMessage(new Identity(sourceUuid, sourceWindowName), payload.get("message"));
+				JsonValue msg = payload.get("message");
+				System.out.println("invoke listener: " + msg);
+				try {
+					l.onMessage(identity, msg);
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+				finally {
+					
+				}
 			});
 		}
 		

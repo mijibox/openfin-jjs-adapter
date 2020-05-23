@@ -1,13 +1,14 @@
 <html>
 <head>
 <script type="text/javascript">
-var openFinApiExecutor = (function() {
+var openFinApiGateway = (function() {
 	let objectMap = new Map();
-	let objId = 1;
+	let objId = 0;
 
-	function setObject(id, obj) {
-		console.log("cache object, id=" + id + ", obj=" + JSON.stringify(obj));
-		objectMap.set(id, obj);
+	function setObject(obj) {
+		let cachedObjId = "obj_" + objId++;
+		objectMap.set(cachedObjId, obj);
+		return cachedObjId;
 	}
 
 	function getObject(id) {
@@ -20,10 +21,8 @@ var openFinApiExecutor = (function() {
 
 	function invokeMethod(obj, method, ...args) {
 		if (!obj) {
-			console.log("no target object specified");
 			var nObj = method.substring(0, method.lastIndexOf('.'));
 			obj = eval(nObj); 
-			console.log("invoking method: " + method + ", obj: " + JSON.stringify(obj));
 			return eval(method).call(obj, ...args);
 		}
 		else {
@@ -32,6 +31,7 @@ var openFinApiExecutor = (function() {
 	}
 	
 	function sendMessage(dest, payload) {
+		console.log("sending message: " + JSON.stringify(payload));
 		fin.InterApplicationBus.send(dest, fin.me.uuid + '-exec', payload);
 	}
 
@@ -45,25 +45,44 @@ var openFinApiExecutor = (function() {
 			if (action == 'ping') {
 				sendMessage(srcIdentity, {action: 'pong', messageId, payload});
 			}
-			else if (action == 'invoke'){
+			else if (action == 'invoke') {
 				let targetObject = null;
 				if (payload.cachedObjId) {
 					targetObject = getObject(payload.cachedObjId);
 				}
 				let args = payload.args || [];
-				console.log("targetObject: " + JSON.stringify(targetObject));
+				//console.log("targetObject: " + JSON.stringify(targetObject));
 				Promise.resolve(invokeMethod(targetObject, payload.method, ...args)).then(result=>{
-					console.log("invokeMethod: " + payload.method + ", got result: " + JSON.stringify(result));
-					let resultPayload = {messageId, action: 'invokeResult', "payload": result};
+					//console.log("invokeMethod: " + payload.method + ", got result: " + JSON.stringify(result));
+					let resultPayload = {messageId, action: 'invoke-result', "payload": result};
 					if (payload.cacheResultObj) {
-						let resultObjId = objId++;
-						setObject(resultObjId, result);
-						resultPayload.resultObjectId = resultObjId;
+						resultPayload.resultObjectId = setObject(result);
 					}
 					sendMessage(srcIdentity, resultPayload);
 				});
 			}
+			else if (action == 'add-listener') {
+				let listenerId = payload.listenerId;
+				let targetObject = null;
+				if (payload.cachedObjId) {
+					targetObject = getObject(payload.cachedObjId);
+				}
+				let listener = function(e) {
+					let topic = fin.me.uuid + '-listener-' + listenerId;
+					console.log(topic + ": " + payload.event + " listener invoked: " + JSON.stringify(e));
+					console.log("srcIdentity: " + JSON.stringify(srcIdentity));
+					fin.InterApplicationBus.send(srcIdentity, topic, e);
+				};
+				let resultObjectId = setObject(listener);
+				invokeMethod(targetObject, payload.method, payload.event, listener);
+				let resultPayload = {messageId, action: 'add-listener-result', "payload": {resultObjectId}};
+				sendMessage(srcIdentity, resultPayload);
+			}
 		});
+		
+		fin.System.addListener('window-closed', e=>{
+			console.log("got window-closed event", JSON.stringify(e));
+		})
 		
 		fin.Window.getCurrent().then(w=>{
 			fin.System.showDeveloperTools(w.identity);

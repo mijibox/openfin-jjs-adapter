@@ -2,7 +2,8 @@ package com.mijibox.openfinjjs;
 
 import javax.json.JsonObject;
 
+@FunctionalInterface
 public interface OpenFinEventListener {
-	default public void onEvent(JsonObject event) {
-	}
+	public void onEvent(JsonObject event);
+	
 }

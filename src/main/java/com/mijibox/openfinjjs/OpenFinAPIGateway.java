@@ -14,20 +14,24 @@ import javax.json.JsonValue;
 public class OpenFinAPIGateway {
 	
 	private OpenFinInterApplicationBus iab;
-	private Identity execIdentity;
-	private String execTopic;
+	private Identity gatewayIdentity;
+	private String topicExec;
+	private String topicListener;
 	private AtomicInteger messageId;
+	private AtomicInteger listenerId;
 	private ConcurrentHashMap<Integer, CompletableFuture<JsonObject>> execCorrelationMap;
 
 	public OpenFinAPIGateway(OpenFinConnection connection) {
 		this.messageId = new AtomicInteger(0);
+		this.listenerId = new AtomicInteger(0);
 		this.execCorrelationMap = new ConcurrentHashMap<>();
-		this.execIdentity = new Identity(connection.getDefaultApplicationUuid(), connection.getDefaultApplicationUuid());
-		this.execTopic = connection.getDefaultApplicationUuid() + "-exec";
-		this.iab = new OpenFinInterApplicationBus(connection);
-		this.iab.subscribe(this.execIdentity, this.execTopic, (srcIdentity, message) -> {
+		String defaultAppUuid = connection.getDefaultApplicationUuid();
+		this.gatewayIdentity = new Identity(defaultAppUuid, defaultAppUuid);
+		this.topicExec = defaultAppUuid + "-exec";
+		this.topicListener = defaultAppUuid + "-listener";
+		this.iab = connection.getInterAppBus();
+		this.iab.subscribe(this.gatewayIdentity, this.topicExec, (srcIdentity, message) -> {
 			JsonObject msg = ((JsonObject)message);
-			System.out.println("got message: " + msg);
 			this.execCorrelationMap.get(msg.getInt("messageId")).complete(msg);
 		});
 	}
@@ -39,7 +43,7 @@ public class OpenFinAPIGateway {
 		JsonObject message = Json.createObjectBuilder().add("messageId", msgId)
 				.add("action", action)
 				.add("payload", payload).build();
-		return this.iab.send(this.execIdentity, this.execTopic, message).thenCombineAsync(responseFuture, (r1, r2) ->{
+		return this.iab.send(this.gatewayIdentity, this.topicExec, message).thenCombineAsync(responseFuture, (r1, r2) ->{
 			return r2;
 		});
 	}
@@ -79,5 +83,29 @@ public class OpenFinAPIGateway {
 		
 		return this.sendMessage("invoke", builder.build());
 	}
+	
+	public CompletionStage<Void> delete(JsonValue cachedObjId) {
+		return this.sendMessage("delete", cachedObjId).thenAccept(resp -> {
+		});
+	}
 
+	public CompletionStage<JsonObject> addListener(JsonValue cachedObjId, String method, String event, OpenFinEventListener listener) {
+		int lId = this.listenerId.getAndIncrement();
+		
+		this.iab.subscribe(this.gatewayIdentity, this.topicListener + "-" + lId, (srcIdentity, message) -> {
+			System.out.println("OpenFinAPIGateway_addListener, invokeListener");
+			listener.onEvent((JsonObject) message);
+		});
+
+		
+		JsonObjectBuilder builder = Json.createObjectBuilder()
+				.add("listenerId", lId)
+				.add("method", method)
+				.add("event", event);
+		if (cachedObjId != null) {
+			builder.add("cachedObjId", cachedObjId);
+		}
+		
+		return this.sendMessage("add-listener", builder.build());
+	}
 }
