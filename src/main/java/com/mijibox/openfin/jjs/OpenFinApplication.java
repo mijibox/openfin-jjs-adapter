@@ -7,6 +7,7 @@ import javax.json.JsonObject;
 import javax.json.JsonValue;
 
 import com.mijibox.openfin.gateway.OpenFinGateway;
+import com.mijibox.openfin.jjs.json.Identity;
 
 public class OpenFinApplication extends OpenFinProxyObject {
 
