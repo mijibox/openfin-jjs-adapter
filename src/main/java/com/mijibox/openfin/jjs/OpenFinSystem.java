@@ -1,17 +1,20 @@
-package com.mijibox.openfinjjs;
+package com.mijibox.openfin.jjs;
 
 import java.util.concurrent.CompletionStage;
 
+import com.mijibox.openfin.gateway.OpenFinEventListener;
+import com.mijibox.openfin.gateway.OpenFinGateway;
+
 public class OpenFinSystem {
 	
-	private OpenFinAPIGateway apiGateway;
+	private OpenFinGateway apiGateway;
 
-	public OpenFinSystem(OpenFinAPIGateway apiGateway) {
+	public OpenFinSystem(OpenFinGateway apiGateway) {
 		this.apiGateway = apiGateway;
 	}
 
 	public CompletionStage<String> getVersion() {
-		return this.apiGateway.invokeMethod("fin.System.getVersion").thenApply(r->{
+		return this.apiGateway.invoke("fin.System.getVersion").thenApply(r->{
 			return r.getString("payload");
 		});
 	}

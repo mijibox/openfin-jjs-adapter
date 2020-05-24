@@ -2,39 +2,20 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.mijibox</groupId>
-	<artifactId>openfin_jjs_adapter</artifactId>
+	<groupId>com.mijibox.openfin</groupId>
+	<artifactId>openfin-jjs-adapter</artifactId>
 	<version>1.0-SNAPSHOT</version>
 
 	<properties>
+		<maven.compiler.release>11</maven.compiler.release>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<dependencies>
-	<dependency>
-		<groupId>org.eclipse.jetty.websocket</groupId>
-		<artifactId>websocket-client</artifactId>
-		<version>9.4.28.v20200408</version>
-	</dependency>
 		<dependency>
-			<groupId>net.java.dev.jna</groupId>
-			<artifactId>jna-platform</artifactId>
-			<version>5.5.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.7.30</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse</groupId>
-			<artifactId>yasson</artifactId>
-			<version>1.0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>javax.json</artifactId>
-			<version>1.1.2</version>
+			<groupId>com.mijibox.openfin</groupId>
+			<artifactId>openfin-gateway</artifactId>
+			<version>1.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -42,10 +23,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.0</version>
-				<configuration>
-					<release>11</release>
-				</configuration>
+				<version>3.8.1</version>
 			</plugin>
 		</plugins>
 	</build>
