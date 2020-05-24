@@ -1,2 +1,2 @@
-# openfin_jjs_adapter
+# openfin-jjs-adapter
 OpenFin Java-JavaScript Adapter
