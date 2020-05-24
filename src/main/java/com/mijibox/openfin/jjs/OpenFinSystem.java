@@ -20,8 +20,7 @@ public class OpenFinSystem {
 	}
 	
 	public void addListener(String event, OpenFinEventListener listener) {
-		this.apiGateway.addListener(null, "fin.System.addListener", event, listener).thenAccept(r->{
-			System.out.println("addListener got result: " + r);
+		this.apiGateway.addListener("fin.System.addListener", event, listener).thenAccept(r->{
 		});
 	}
 }
