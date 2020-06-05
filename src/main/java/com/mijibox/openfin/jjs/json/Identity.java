@@ -2,7 +2,7 @@ package com.mijibox.openfin.jjs.json;
 
 import javax.json.JsonObject;
 
-public class Identity extends JsonBean {
+public class Identity extends JsonBeanImpl {
 
 	public Identity() {
 	}
@@ -21,7 +21,7 @@ public class Identity extends JsonBean {
 	}
 
 	public void setUuid(String uuid) {
-		this.setStringValue("uuid", uuid);
+		this.setString("uuid", uuid);
 	}
 	
 	public String getUuid() {
@@ -29,7 +29,7 @@ public class Identity extends JsonBean {
 	}
 	
 	public void setName(String name) {
-		this.setStringValue("name", name);
+		this.setString("name", name);
 	}
 	
 	public String getName() {

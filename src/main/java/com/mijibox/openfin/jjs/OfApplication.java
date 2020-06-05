@@ -2,11 +2,12 @@ package com.mijibox.openfin.jjs;
 
 import static com.mijibox.openfin.jjs.OfUtils.runSync;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletionStage;
 
 import javax.json.Json;
 import javax.json.JsonObject;
-import javax.json.JsonValue;
 
 import com.mijibox.openfin.gateway.OpenFinGateway;
 import com.mijibox.openfin.gateway.ProxyObject;
@@ -89,7 +90,7 @@ public class OfApplication extends OfObject {
 
 	public CompletionStage<OfWindow> getWindowAsync() {
 		return this.ofInstance.invoke(true, "getWindow").thenApply(r -> {
-			return new OfWindow(r.getProxyObject(), this.gateway);
+			return new OfWindow(new Identity(r.getResultAsJsonObject().getJsonObject("identity")), r.getProxyObject(), this.gateway);
 		});
 	}
 	
@@ -99,5 +100,22 @@ public class OfApplication extends OfObject {
 
 	public Identity getIdentity() {
 		return this.identity;
+	}
+
+	public CompletionStage<List<OfWindow>> getChildWindowsAsync() {
+		return this.ofInstance.invoke("getChildWindows").thenApply(r->{
+			return r.getResultAsJsonArray();
+		}).thenApply(wins ->{
+			ArrayList<OfWindow> windows = new ArrayList<>();
+			wins.forEach(w ->{
+				JsonObject winJson = (JsonObject)w;
+				windows.add(OfWindow.wrap(new Identity(winJson.getJsonObject("identity")), gateway));
+			});
+			return windows;
+		});
+	}
+	
+	public List<OfWindow> getChildWindows() {
+		return runSync(this.getChildWindowsAsync());
 	}
 }

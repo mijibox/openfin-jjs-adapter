@@ -2,7 +2,7 @@ package com.mijibox.openfin.jjs.json;
 
 import javax.json.JsonObject;
 
-public class Ack extends JsonBean {
+public class Ack extends JsonBeanImpl {
 	
 	public Ack() {
 		super();
@@ -13,11 +13,11 @@ public class Ack extends JsonBean {
 	}
 	
 	public boolean isSuccess() {
-		return this.getBooleanValue("success", false);
+		return this.getBoolean("success");
 	}
 	
 	public String getReason() {
-		return this.getStringValue("reason", "N/A");
+		return this.getString("reason");
 	}
 	
 	@Override 
