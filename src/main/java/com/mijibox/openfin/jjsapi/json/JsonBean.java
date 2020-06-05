@@ -1,4 +1,4 @@
-package com.mijibox.openfin.jjs.json;
+package com.mijibox.openfin.jjsapi.json;
 
 import javax.json.Json;
 import javax.json.JsonObject;

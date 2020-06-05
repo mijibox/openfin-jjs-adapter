@@ -1,4 +1,4 @@
-package com.mijibox.openfin.jjs.json;
+package com.mijibox.openfin.jjsapi.json;
 
 import javax.json.JsonObject;
 
@@ -8,6 +8,7 @@ public class Identity extends JsonBean {
 	}
 
 	public Identity(JsonObject json) {
+		super(json);
 	}
 	
 	public Identity(String uuid) {
