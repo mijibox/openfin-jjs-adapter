@@ -1,6 +1,6 @@
-package com.mijibox.openfin.jjsapi;
+package com.mijibox.openfin.jjs;
 
-import static com.mijibox.openfin.jjsapi.Utils.runSync;
+import static com.mijibox.openfin.jjs.Utils.runSync;
 
 import java.util.concurrent.CompletionStage;
 

@@ -1,4 +1,4 @@
-package com.mijibox.openfin.jjsapi;
+package com.mijibox.openfin.jjs;
 
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;

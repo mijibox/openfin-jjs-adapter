@@ -1,4 +1,4 @@
-package com.mijibox.openfin.jjsapi;
+package com.mijibox.openfin.jjs;
 
 import com.mijibox.openfin.gateway.OpenFinGateway;
 import com.mijibox.openfin.gateway.ProxyObject;
