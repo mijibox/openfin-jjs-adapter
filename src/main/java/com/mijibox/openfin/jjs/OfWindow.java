@@ -13,11 +13,8 @@ import com.mijibox.openfin.jjs.json.Identity;
 
 public class OfWindow extends OfObject {
 
-	private Identity identity;
-
-	OfWindow(Identity identity, ProxyObject obj, OpenFinGateway gateway) {
+	OfWindow(ProxyObject obj, OpenFinGateway gateway) {
 		super(obj, gateway);
-		this.identity = identity;
 	}
 
 	public CompletionStage<Void> navigateAsync(String url) {
@@ -29,13 +26,13 @@ public class OfWindow extends OfObject {
 		runSync(navigateAsync(url));
 	}
 
-	public static CompletionStage<OfWindow> wrapAsync(Identity identity, OpenFinGateway gateway) {
-		return gateway.invoke(true, "fin.Window.wrap", identity.getJson()).thenApply(r -> {
-			return new OfWindow(identity, r.getProxyObject(), gateway);
+	public static CompletionStage<OfWindow> wrapAsync(JsonObject identity, OpenFinGateway gateway) {
+		return gateway.invoke(true, "fin.Window.wrap", identity).thenApply(r -> {
+			return new OfWindow(r.getProxyObject(), gateway);
 		});
 	}
 
-	public static OfWindow wrap(Identity identity, OpenFinGateway gateway) {
+	public static OfWindow wrap(JsonObject identity, OpenFinGateway gateway) {
 		return runSync(wrapAsync(identity, gateway));
 	}
 
@@ -48,7 +45,4 @@ public class OfWindow extends OfObject {
 		runSync(this.flashAsync());
 	}
 	
-	public Identity getIdentity() {
-		return this.identity;
-	}
 }

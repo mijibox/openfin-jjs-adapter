@@ -19,8 +19,7 @@ public class OfChannel {
 				});
 	}
 
-	public static OfChannelProvider create(String channelName, JsonObject options,
-			OpenFinGateway gateway) {
+	public static OfChannelProvider create(String channelName, OpenFinGateway gateway) {
 		return runSync(createAsync(channelName, gateway));
 	}
 
@@ -38,7 +37,7 @@ public class OfChannel {
 	}
 
 	public static CompletionStage<Void> onChannelConnectAsync(OpenFinEventListener listener, OpenFinGateway gateway) {
-		return gateway.addListener(false, "fin.InterApplicationBus.Channel.onChannelConnect", listener)
+		return gateway.addListener("fin.InterApplicationBus.Channel.onChannelConnect", listener)
 				.thenAccept(v -> {
 
 				});
@@ -50,7 +49,7 @@ public class OfChannel {
 
 	public static CompletionStage<Void> onChannelDisconnectAsync(OpenFinEventListener listener,
 			OpenFinGateway gateway) {
-		return gateway.addListener(false, "fin.InterApplicationBus.Channel.onChannelDisconnect", listener)
+		return gateway.addListener("fin.InterApplicationBus.Channel.onChannelDisconnect", listener)
 				.thenAccept(v -> {
 
 				});
