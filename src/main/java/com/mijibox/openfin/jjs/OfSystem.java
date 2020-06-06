@@ -10,35 +10,29 @@ import com.mijibox.openfin.gateway.ProxyListener;
 
 public class OfSystem {
 
-	private OpenFinGateway gateway;
-
-	public OfSystem(OpenFinGateway gateway) {
-		this.gateway = gateway;
-	}
-
-	public CompletionStage<String> getVersionAsync() {
-		return this.gateway.invoke("fin.System.getVersion").thenApply(r -> {
+	public static CompletionStage<String> getVersionAsync(OpenFinGateway gateway) {
+		return gateway.invoke("fin.System.getVersion").thenApply(r -> {
 			return r.getResultAsString();
 		});
 	}
 	
-	public String getVersion() {
-		return runSync(getVersionAsync());
+	public static String getVersion(OpenFinGateway gateway) {
+		return runSync(getVersionAsync(gateway));
 	}
 
-	public CompletionStage<ProxyListener> addListenerAsync(String event, OpenFinEventListener listener) {
-		return this.gateway.addListener(true, "fin.System.on", event, listener);
+	public static CompletionStage<ProxyListener> addListenerAsync(OpenFinGateway gateway, String event, OpenFinEventListener listener) {
+		return gateway.addListener(true, "fin.System.on", event, listener);
 	}
 	
-	public ProxyListener addListener(String event, OpenFinEventListener listener) {
-		return runSync(this.addListenerAsync(event, listener));
+	public static ProxyListener addListener(OpenFinGateway gateway, String event, OpenFinEventListener listener) {
+		return runSync(addListenerAsync(gateway, event, listener));
 	}
 
-	public CompletionStage<Void> removeListenerAsync(String event, ProxyListener listener) {
-		return this.gateway.removeListener("removeListener", event, listener);
+	public static CompletionStage<Void> removeListenerAsync(OpenFinGateway gateway, String event, ProxyListener listener) {
+		return gateway.removeListener("removeListener", event, listener);
 	}
 	
-	public void removeListener(String event, ProxyListener listener) {
-		runSync(this.removeListenerAsync(event, listener));
+	public static void removeListener(OpenFinGateway gateway, String event, ProxyListener listener) {
+		runSync(removeListenerAsync(gateway, event, listener));
 	}
 }
