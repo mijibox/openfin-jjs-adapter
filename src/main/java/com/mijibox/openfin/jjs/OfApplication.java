@@ -19,8 +19,7 @@ public class OfApplication extends OfObject {
 		super(obj, gateway);
 	}
 
-	public static CompletionStage<OfApplication> startAsync(JsonObject appOpts,
-			OpenFinGateway gateway) {
+	public static CompletionStage<OfApplication> startAsync(OpenFinGateway gateway, JsonObject appOpts			) {
 		return gateway.invoke(true, "fin.Application.start", appOpts)
 				.thenApply(r -> {
 					JsonObject app = (JsonObject) r.getResult();
@@ -28,12 +27,11 @@ public class OfApplication extends OfObject {
 				});
 	}
 
-	public OfApplication start(JsonObject appOpts, OpenFinGateway gateway) {
-		return runSync(startAsync(appOpts, gateway));
+	public OfApplication start(OpenFinGateway gateway, JsonObject appOpts) {
+		return runSync(startAsync(gateway, appOpts));
 	}
 
-	public static CompletionStage<OfApplication> startFromManifestAsync(String manifestUrl,
-			OpenFinGateway gateway) {
+	public static CompletionStage<OfApplication> startFromManifestAsync(OpenFinGateway gateway, String manifestUrl) {
 		return gateway.invoke(true, "fin.Application.startFromManifest",
 				Json.createValue(manifestUrl)).thenApply(r -> {
 					// System.out.println("startFromManifest got result: " + r);
@@ -42,18 +40,18 @@ public class OfApplication extends OfObject {
 				});
 	}
 
-	public OfApplication startFromManifest(String manifestUrl, OpenFinGateway gateway) {
-		return runSync(startFromManifestAsync(manifestUrl, gateway));
+	public OfApplication startFromManifest(OpenFinGateway gateway, String manifestUrl) {
+		return runSync(startFromManifestAsync(gateway, manifestUrl));
 	}
 
-	public static CompletionStage<OfApplication> wrapAsync(JsonObject identity, OpenFinGateway gateway) {
+	public static CompletionStage<OfApplication> wrapAsync(OpenFinGateway gateway, JsonObject identity) {
 		return gateway.invoke(true, "fin.Application.wrap", identity).thenApply(r -> {
 			return new OfApplication(r.getProxyObject(), gateway);
 		});
 	}
 
-	public static OfApplication wrap(JsonObject identity, OpenFinGateway gateway) {
-		return runSync(wrapAsync(identity, gateway));
+	public static OfApplication wrap(OpenFinGateway gateway, JsonObject identity) {
+		return runSync(wrapAsync(gateway, identity));
 	}
 
 	public CompletionStage<Boolean> isRunningAsync() {
@@ -101,7 +99,7 @@ public class OfApplication extends OfObject {
 			ArrayList<OfWindow> windows = new ArrayList<>();
 			wins.forEach(w -> {
 				JsonObject winJson = (JsonObject) w;
-				windows.add(OfWindow.wrap(winJson.getJsonObject("identity"), gateway));
+				windows.add(OfWindow.wrap(gateway, winJson.getJsonObject("identity")));
 			});
 			return windows;
 		});

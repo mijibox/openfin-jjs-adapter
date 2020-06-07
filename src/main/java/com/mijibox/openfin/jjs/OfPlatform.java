@@ -16,15 +16,15 @@ public class OfPlatform extends OfObject {
 		super(obj, gateway);
 	}
 	
-	public static CompletionStage<OfPlatform> startFromManifestAsync(String manifestUrl, JsonObject rvmLaunchOptions, OpenFinGateway gateway) {
+	public static CompletionStage<OfPlatform> startFromManifestAsync(OpenFinGateway gateway, String manifestUrl, JsonObject rvmLaunchOptions) {
 		return gateway.invoke(true, "fin.Platform.startFromManifest", Json.createValue(manifestUrl), rvmLaunchOptions)
 				.thenApply(r -> {
 					return new OfPlatform(r.getProxyObject(), gateway);
 				});
 	}
 	
-	public static OfPlatform startFromManifest(String manifestUrl, JsonObject rvmLaunchOptions, OpenFinGateway gateway) {
-		return runSync(startFromManifestAsync(manifestUrl, rvmLaunchOptions, gateway));
+	public static OfPlatform startFromManifest(OpenFinGateway gateway, String manifestUrl, JsonObject rvmLaunchOptions) {
+		return runSync(startFromManifestAsync(gateway, manifestUrl, rvmLaunchOptions));
 	}
 	
 	public CompletionStage<Void> quitAsync() {

@@ -26,14 +26,14 @@ public class OfWindow extends OfObject {
 		runSync(navigateAsync(url));
 	}
 
-	public static CompletionStage<OfWindow> wrapAsync(JsonObject identity, OpenFinGateway gateway) {
+	public static CompletionStage<OfWindow> wrapAsync(OpenFinGateway gateway, JsonObject identity) {
 		return gateway.invoke(true, "fin.Window.wrap", identity).thenApply(r -> {
 			return new OfWindow(r.getProxyObject(), gateway);
 		});
 	}
 
-	public static OfWindow wrap(JsonObject identity, OpenFinGateway gateway) {
-		return runSync(wrapAsync(identity, gateway));
+	public static OfWindow wrap(OpenFinGateway gateway, JsonObject identity) {
+		return runSync(wrapAsync(gateway, identity));
 	}
 
 	public CompletionStage<Void> flashAsync() {
