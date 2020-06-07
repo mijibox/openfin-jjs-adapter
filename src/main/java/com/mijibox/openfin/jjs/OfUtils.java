@@ -11,7 +11,7 @@ public interface OfUtils {
 			return future.toCompletableFuture().exceptionally(e -> {
 				e.printStackTrace();
 				throw new RuntimeException(e);
-			}).get(10, TimeUnit.SECONDS);
+			}).get(30, TimeUnit.SECONDS);
 		}
 		catch (InterruptedException | ExecutionException | TimeoutException e) {
 			throw new RuntimeException(e);

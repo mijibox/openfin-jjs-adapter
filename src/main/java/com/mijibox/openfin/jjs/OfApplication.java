@@ -8,6 +8,7 @@ import java.util.concurrent.CompletionStage;
 
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 
 import com.mijibox.openfin.gateway.OpenFinGateway;
 import com.mijibox.openfin.gateway.ProxyObject;
@@ -21,26 +22,23 @@ public class OfApplication extends OfObject {
 	public static CompletionStage<OfApplication> startAsync(OpenFinGateway gateway, JsonObject appOpts) {
 		return gateway.invoke(true, "fin.Application.start", appOpts)
 				.thenApply(r -> {
-					JsonObject app = (JsonObject) r.getResult();
 					return new OfApplication(r.getProxyObject());
 				});
 	}
 
-	public OfApplication start(OpenFinGateway gateway, JsonObject appOpts) {
+	public static OfApplication start(OpenFinGateway gateway, JsonObject appOpts) {
 		return runSync(startAsync(gateway, appOpts));
 	}
 
-	public static CompletionStage<OfApplication> startFromManifestAsync(OpenFinGateway gateway, String manifestUrl) {
+	public static CompletionStage<OfApplication> startFromManifestAsync(OpenFinGateway gateway, String manifestUrl, JsonObject rvmOptions) {
 		return gateway.invoke(true, "fin.Application.startFromManifest",
-				Json.createValue(manifestUrl)).thenApply(r -> {
-					// System.out.println("startFromManifest got result: " + r);
-					JsonObject app = (JsonObject) r.getResult();
+				Json.createValue(manifestUrl), rvmOptions).thenApply(r -> {
 					return new OfApplication(r.getProxyObject());
 				});
 	}
 
-	public OfApplication startFromManifest(OpenFinGateway gateway, String manifestUrl) {
-		return runSync(startFromManifestAsync(gateway, manifestUrl));
+	public static OfApplication startFromManifest(OpenFinGateway gateway, String manifestUrl, JsonObject rvmOptions) {
+		return runSync(startFromManifestAsync(gateway, manifestUrl, rvmOptions));
 	}
 
 	public static CompletionStage<OfApplication> wrapAsync(OpenFinGateway gateway, JsonObject identity) {
@@ -64,7 +62,7 @@ public class OfApplication extends OfObject {
 	}
 
 	public CompletionStage<Void> quitAsync(boolean force) {
-		return this.ofInstance.invoke("quit", Json.createValue(force ? 1 : 0)).thenAccept(result -> {
+		return this.ofInstance.invoke("quit", force ? JsonValue.TRUE : JsonValue.FALSE).thenAccept(result -> {
 		});
 	}
 
@@ -107,5 +105,65 @@ public class OfApplication extends OfObject {
 	public List<OfWindow> getChildWindows() {
 		return runSync(this.getChildWindowsAsync());
 	}
+
+	public CompletionStage<JsonObject> getInfoAsync() {
+		return this.ofInstance.invoke("getInfo").thenApply(r -> {
+			return r.getResultAsJsonObject();
+		});
+	}
+	
+	public JsonObject getInfo() {
+		return runSync(this.getInfoAsync());
+	}
+
+	public CompletionStage<JsonObject> getManifestAsync() {
+		return this.ofInstance.invoke("getManifest").thenApply(r -> {
+			return r.getResultAsJsonObject();
+		});
+	}
+	
+	public JsonObject getManifest() {
+		return runSync(this.getManifestAsync());
+	}
+
+	public CompletionStage<String> getParentUuidAsync() {
+		return this.ofInstance.invoke("getParentUuid").thenApply(r -> {
+			return r.getResultAsString();
+		});
+	}
+	
+	public String getParentUuid() {
+		return runSync(this.getParentUuidAsync());
+	}
+	
+	public CompletionStage<Void> setZoomLevelAsync(double zoomLevel) {
+		return this.ofInstance.invoke("setZoomLevel", Json.createValue(zoomLevel)).thenAccept(r -> {
+		});
+	}
+	
+	public void setZoomLevel(double zoomLevel) {
+		runSync(this.setZoomLevelAsync(zoomLevel));
+	}
+
+	public CompletionStage<Double> getZoomLevelAsync() {
+		return this.ofInstance.invoke("getZoomLevel").thenApply(r -> {
+			return r.getResultAsDouble();
+		});
+	}
+	
+	public double getZoomLevel() {
+		return runSync(this.getZoomLevelAsync());
+	}
+
+	public CompletionStage<Void> registerUserAsync(String userName, String appName) {
+		return this.ofInstance.invoke("registerUser", Json.createValue(userName), Json.createValue(appName)).thenAccept(r -> {
+		});
+	}
+	
+	public void registerUser(String userName, String appName) {
+		runSync(this.registerUserAsync(userName, appName));
+	}
+
+
 
 }
