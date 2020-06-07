@@ -2,6 +2,8 @@ package com.mijibox.openfin.jjs;
 
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public interface OfUtils {
 	static <T> T runSync(CompletionStage<T> future) {
@@ -9,9 +11,9 @@ public interface OfUtils {
 			return future.toCompletableFuture().exceptionally(e -> {
 				e.printStackTrace();
 				throw new RuntimeException(e);
-			}).get();
+			}).get(10, TimeUnit.SECONDS);
 		}
-		catch (InterruptedException | ExecutionException e) {
+		catch (InterruptedException | ExecutionException | TimeoutException e) {
 			throw new RuntimeException(e);
 		}
 	}

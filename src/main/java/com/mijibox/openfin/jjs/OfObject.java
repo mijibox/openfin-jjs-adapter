@@ -4,6 +4,8 @@ import static com.mijibox.openfin.jjs.OfUtils.runSync;
 
 import java.util.concurrent.CompletionStage;
 
+import javax.json.JsonObject;
+
 import com.mijibox.openfin.gateway.OpenFinEventListener;
 import com.mijibox.openfin.gateway.ProxyListener;
 import com.mijibox.openfin.gateway.ProxyObject;
@@ -37,5 +39,9 @@ public class OfObject {
 	
 	public void dispose() {
 		runSync(this.disposeAsync());
+	}
+	
+	public JsonObject getIdentity() {
+		return this.ofInstance.getResultJson().getJsonObject("identity");
 	}
 }
