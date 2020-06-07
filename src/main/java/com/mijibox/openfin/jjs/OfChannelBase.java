@@ -7,13 +7,12 @@ import java.util.concurrent.CompletionStage;
 import javax.json.Json;
 
 import com.mijibox.openfin.gateway.OpenFinEventListener;
-import com.mijibox.openfin.gateway.OpenFinGateway;
 import com.mijibox.openfin.gateway.ProxyObject;
 
 public class OfChannelBase extends OfObject {
 
-	OfChannelBase(ProxyObject obj, OpenFinGateway gateway) {
-		super(obj, gateway);
+	OfChannelBase(ProxyObject obj) {
+		super(obj);
 	}
 
 	public CompletionStage<Void> onDisconnectionAsync(OpenFinEventListener listener) {

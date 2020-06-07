@@ -5,17 +5,14 @@ import static com.mijibox.openfin.jjs.OfUtils.runSync;
 import java.util.concurrent.CompletionStage;
 
 import com.mijibox.openfin.gateway.OpenFinEventListener;
-import com.mijibox.openfin.gateway.OpenFinGateway;
 import com.mijibox.openfin.gateway.ProxyListener;
 import com.mijibox.openfin.gateway.ProxyObject;
 
 public class OfObject {
 	protected ProxyObject ofInstance;
-	protected OpenFinGateway gateway;
 
-	OfObject(ProxyObject obj, OpenFinGateway gateway) {
+	OfObject(ProxyObject obj) {
 		this.ofInstance = obj;
-		this.gateway = gateway;
 	}
 
 	public CompletionStage<ProxyListener> addListenerAsync(String event, OpenFinEventListener listener) {

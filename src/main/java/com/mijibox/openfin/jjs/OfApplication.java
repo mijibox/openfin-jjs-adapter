@@ -11,19 +11,18 @@ import javax.json.JsonObject;
 
 import com.mijibox.openfin.gateway.OpenFinGateway;
 import com.mijibox.openfin.gateway.ProxyObject;
-import com.mijibox.openfin.jjs.json.Identity;
 
 public class OfApplication extends OfObject {
 
-	protected OfApplication(ProxyObject obj, OpenFinGateway gateway) {
-		super(obj, gateway);
+	protected OfApplication(ProxyObject obj) {
+		super(obj);
 	}
 
-	public static CompletionStage<OfApplication> startAsync(OpenFinGateway gateway, JsonObject appOpts			) {
+	public static CompletionStage<OfApplication> startAsync(OpenFinGateway gateway, JsonObject appOpts) {
 		return gateway.invoke(true, "fin.Application.start", appOpts)
 				.thenApply(r -> {
 					JsonObject app = (JsonObject) r.getResult();
-					return new OfApplication(r.getProxyObject(), gateway);
+					return new OfApplication(r.getProxyObject());
 				});
 	}
 
@@ -36,7 +35,7 @@ public class OfApplication extends OfObject {
 				Json.createValue(manifestUrl)).thenApply(r -> {
 					// System.out.println("startFromManifest got result: " + r);
 					JsonObject app = (JsonObject) r.getResult();
-					return new OfApplication(r.getProxyObject(), gateway);
+					return new OfApplication(r.getProxyObject());
 				});
 	}
 
@@ -46,7 +45,7 @@ public class OfApplication extends OfObject {
 
 	public static CompletionStage<OfApplication> wrapAsync(OpenFinGateway gateway, JsonObject identity) {
 		return gateway.invoke(true, "fin.Application.wrap", identity).thenApply(r -> {
-			return new OfApplication(r.getProxyObject(), gateway);
+			return new OfApplication(r.getProxyObject());
 		});
 	}
 
@@ -84,7 +83,7 @@ public class OfApplication extends OfObject {
 
 	public CompletionStage<OfWindow> getWindowAsync() {
 		return this.ofInstance.invoke(true, "getWindow").thenApply(r -> {
-			return new OfWindow(r.getProxyObject(), this.gateway);
+			return new OfWindow(r.getProxyObject());
 		});
 	}
 
@@ -99,7 +98,7 @@ public class OfApplication extends OfObject {
 			ArrayList<OfWindow> windows = new ArrayList<>();
 			wins.forEach(w -> {
 				JsonObject winJson = (JsonObject) w;
-				windows.add(OfWindow.wrap(gateway, winJson.getJsonObject("identity")));
+				windows.add(OfWindow.wrap(ofInstance.getGateway(), winJson.getJsonObject("identity")));
 			});
 			return windows;
 		});
@@ -108,6 +107,5 @@ public class OfApplication extends OfObject {
 	public List<OfWindow> getChildWindows() {
 		return runSync(this.getChildWindowsAsync());
 	}
-	
-	
+
 }

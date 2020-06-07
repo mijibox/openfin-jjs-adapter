@@ -15,7 +15,7 @@ public class OfChannel {
 	public static CompletionStage<OfChannelProvider> createAsync(OpenFinGateway gateway, String channelName) {
 		return gateway.invoke(true, "fin.InterApplicationBus.Channel.create", Json.createValue(channelName))
 				.thenApply(r -> {
-					return new OfChannelProvider(r.getProxyObject(), gateway);
+					return new OfChannelProvider(r.getProxyObject());
 				});
 	}
 
@@ -26,7 +26,7 @@ public class OfChannel {
 	public static CompletionStage<OfChannelClient> connectAsync(OpenFinGateway gateway, String channelName, JsonObject options) {
 		return gateway.invoke(true, "fin.InterApplicationBus.Channel.connect", Json.createValue(channelName), options)
 				.thenApply(r -> {
-					return new OfChannelClient(r.getProxyObject(), gateway);
+					return new OfChannelClient(r.getProxyObject());
 				});
 	}
 

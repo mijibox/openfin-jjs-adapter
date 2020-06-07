@@ -9,12 +9,11 @@ import javax.json.JsonObject;
 
 import com.mijibox.openfin.gateway.OpenFinGateway;
 import com.mijibox.openfin.gateway.ProxyObject;
-import com.mijibox.openfin.jjs.json.Identity;
 
 public class OfWindow extends OfObject {
 
-	OfWindow(ProxyObject obj, OpenFinGateway gateway) {
-		super(obj, gateway);
+	OfWindow(ProxyObject obj) {
+		super(obj);
 	}
 
 	public CompletionStage<Void> navigateAsync(String url) {
@@ -28,7 +27,7 @@ public class OfWindow extends OfObject {
 
 	public static CompletionStage<OfWindow> wrapAsync(OpenFinGateway gateway, JsonObject identity) {
 		return gateway.invoke(true, "fin.Window.wrap", identity).thenApply(r -> {
-			return new OfWindow(r.getProxyObject(), gateway);
+			return new OfWindow(r.getProxyObject());
 		});
 	}
 

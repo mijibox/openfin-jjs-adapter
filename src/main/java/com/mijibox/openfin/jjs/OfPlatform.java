@@ -12,14 +12,14 @@ import com.mijibox.openfin.gateway.ProxyObject;
 
 public class OfPlatform extends OfObject {
 
-	protected OfPlatform(ProxyObject obj, OpenFinGateway gateway) {
-		super(obj, gateway);
+	protected OfPlatform(ProxyObject obj) {
+		super(obj);
 	}
 	
 	public static CompletionStage<OfPlatform> startFromManifestAsync(OpenFinGateway gateway, String manifestUrl, JsonObject rvmLaunchOptions) {
 		return gateway.invoke(true, "fin.Platform.startFromManifest", Json.createValue(manifestUrl), rvmLaunchOptions)
 				.thenApply(r -> {
-					return new OfPlatform(r.getProxyObject(), gateway);
+					return new OfPlatform(r.getProxyObject());
 				});
 	}
 	

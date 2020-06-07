@@ -1,5 +1,7 @@
 package com.mijibox.openfin.jjs;
 
+import static com.mijibox.openfin.jjs.OfUtils.runSync;
+
 import java.util.concurrent.CompletionStage;
 
 import javax.json.Json;
@@ -7,14 +9,12 @@ import javax.json.JsonObject;
 import javax.json.JsonValue;
 
 import com.mijibox.openfin.gateway.OpenFinEventListener;
-import com.mijibox.openfin.gateway.OpenFinGateway;
 import com.mijibox.openfin.gateway.ProxyObject;
-import static com.mijibox.openfin.jjs.OfUtils.runSync;
 
 public class OfChannelProvider extends OfChannelBase {
 
-	OfChannelProvider(ProxyObject obj, OpenFinGateway gateway) {
-		super(obj, gateway);
+	OfChannelProvider(ProxyObject obj) {
+		super(obj);
 	}
 	
 	public CompletionStage<Void> onConnectionAsync(OpenFinEventListener listener) {

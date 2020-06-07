@@ -5,16 +5,14 @@ import static com.mijibox.openfin.jjs.OfUtils.runSync;
 import java.util.concurrent.CompletionStage;
 
 import javax.json.Json;
-import javax.json.JsonObject;
 import javax.json.JsonValue;
 
-import com.mijibox.openfin.gateway.OpenFinGateway;
 import com.mijibox.openfin.gateway.ProxyObject;
 
 public class OfChannelClient extends OfChannelBase {
 
-	OfChannelClient(ProxyObject obj, OpenFinGateway gateway) {
-		super(obj, gateway);
+	OfChannelClient(ProxyObject obj) {
+		super(obj);
 	}
 	
 	public CompletionStage<JsonValue> dispatchAsync(String action, JsonValue payload) {
