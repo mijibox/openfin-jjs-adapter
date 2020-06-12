@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.concurrent.TimeUnit;
+
+import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
@@ -18,14 +21,16 @@ import com.mijibox.openfin.gateway.OpenFinLauncher;
 
 public class SystemTest {
 	private final static Logger logger = LoggerFactory.getLogger(SystemTest.class);
-	
+
 	private final static String RUNTIME_VERSION = "16.83.50.9";
 
 	private static OpenFinGateway gateway;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		gateway = OpenFinLauncher.newOpenFinLauncherBuilder().runtimeVersion(RUNTIME_VERSION).open(null).toCompletableFuture()
+		System.setProperty("com.mijibox.openfin.gateway.showConsole", "true");
+		gateway = OpenFinLauncher.newOpenFinLauncherBuilder().runtimeVersion(RUNTIME_VERSION).open(null)
+				.toCompletableFuture()
 				.get();
 	}
 
@@ -110,21 +115,21 @@ public class SystemTest {
 		logger.debug("getRvmInfo: {}", rvmInfo);
 		assertNotNull(rvmInfo);
 	}
-	
+
 	@Test
 	public void getUniqueUserId() throws Exception {
 		String userId = OfSystem.getUniqueUserId(gateway);
 		logger.debug("getUniqueUserId: {}", userId);
 		assertNotNull(userId);
 	}
-	
+
 	@Test
 	public void getCommandLineArguments() throws Exception {
 		String args = OfSystem.getCommandLineArguments(gateway);
 		logger.debug("getCommandLineArguments: {}", args);
 		assertNotNull(args);
 	}
-	
+
 	@Test
 	public void openUrlWithBrowser() throws Exception {
 		OfSystem.openUrlWithBrowser(gateway, "https://www.google.com");
@@ -133,6 +138,35 @@ public class SystemTest {
 	@Test
 	public void clearCache() throws Exception {
 		OfSystem.clearCache(gateway, null);
+	}
+
+	@Test
+	public void downloadRuntime() throws Exception {
+		OfSystem.downloadRuntimeAsync(gateway, Json.createObjectBuilder().add("version", "13.76.45.14").build(), e -> {
+			logger.debug("download progress: {}", e.toString());
+			return null;
+		}).toCompletableFuture().get(180, TimeUnit.SECONDS);
+	}
+
+	@Test
+	public void getEnvironmentVariable() throws Exception {
+		String tempDir = OfSystem.getEnvironmentVariable(gateway, "TEMP");
+		logger.debug("getEnvironmentVariable('TEMP'): {}", tempDir);
+		assertNotNull(tempDir);
+	}
+
+	@Test
+	public void getInstalledRuntimes() throws Exception {
+		JsonArray runtimes = OfSystem.getInstalledRuntimes(gateway);
+		logger.debug("getInstalledRuntimes(): {}", runtimes);
+		assertNotNull(runtimes);
+	}
+
+	@Test
+	public void getLogList() throws Exception {
+		JsonArray logList = OfSystem.getLogList(gateway);
+		logger.debug("getLogList(): {}", logList);
+		assertNotNull(logList);
 	}
 
 }

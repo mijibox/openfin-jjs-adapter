@@ -62,6 +62,28 @@ public class OfPlatform extends OfObject {
 		return runSync(createViewAsync(viewOpts));
 	}
 
+	public CompletionStage<OfView> reparentViewAsync(JsonObject viewIdentity, JsonObject target) {
+		return this.ofInstance.invoke(true, "reparentView", viewIdentity, target)
+				.thenApply(r -> {
+					return new OfView(r.getProxyObject());
+				});
+	}
+
+	public OfView reparentView(JsonObject viewIdentity, JsonObject target) {
+		return runSync(reparentViewAsync(viewIdentity, target));
+	}
+
+	public CompletionStage<OfWindow> createWindowAsync(JsonObject winOpts) {
+		return this.ofInstance.invoke(true, "createWindow", winOpts)
+				.thenApply(r -> {
+					return new OfWindow(r.getProxyObject());
+				});
+	}
+
+	public OfWindow createWindow(JsonObject winOpts) {
+		return runSync(createWindowAsync(winOpts));
+	}
+
 	public CompletionStage<Void> closeViewAsync(JsonObject viewIdentity) {
 		return this.ofInstance.invoke(true, "closeView", viewIdentity)
 				.thenAccept(r -> {

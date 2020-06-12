@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.CompletionStage;
 
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 
@@ -162,6 +163,111 @@ public class OfApplication extends OfObject {
 	
 	public void registerUser(String userName, String appName) {
 		runSync(this.registerUserAsync(userName, appName));
+	}
+
+	public CompletionStage<List<List<OfWindow>>> getGroupsAsync() {
+		return this.ofInstance.invoke("getGroups").thenApply(r -> {
+			ArrayList<List<OfWindow>> groupList = new ArrayList<>();
+			JsonArray groups = r.getResultAsJsonArray();
+			groups.forEach(g ->{
+				ArrayList<OfWindow> windowList = new ArrayList<>();
+				groupList.add(windowList);
+				JsonArray group = (JsonArray)g;
+				group.forEach(w->{
+					JsonObject winId = ((JsonObject)w).getJsonObject("identity");
+					windowList.add(OfWindow.wrap(this.ofInstance.getGateway(), winId));
+				});
+			});
+			return groupList;
+		});
+	}
+	
+	public List<List<OfWindow>> getGroups() {
+		return runSync(this.getGroupsAsync());
+	}
+
+	public CompletionStage<JsonObject> getShortcutsAsync() {
+		return this.ofInstance.invoke("getShortcuts").thenApply(r -> {
+			return r.getResultAsJsonObject();
+		});
+	}
+	
+	public JsonObject getShortcuts() {
+		return runSync(this.getShortcutsAsync());
+	}
+
+	public CompletionStage<JsonObject> getTrayIconInfoAsync() {
+		return this.ofInstance.invoke("getTrayIconInfo").thenApply(r -> {
+			return r.getResultAsJsonObject();
+		});
+	}
+	
+	public JsonObject getTrayIconInfo() {
+		return runSync(this.getTrayIconInfoAsync());
+	}
+
+	public CompletionStage<Void> removeTrayIconAsync() {
+		return this.ofInstance.invoke("removeTrayIcon").thenAccept(result -> {
+		});
+	}
+
+	public void removeTrayIcon() {
+		runSync(removeTrayIconAsync());
+	}
+
+	public CompletionStage<Void> restartAsync() {
+		return this.ofInstance.invoke("restart").thenAccept(result -> {
+		});
+	}
+
+	public void restart() {
+		runSync(restartAsync());
+	}
+
+	public CompletionStage<Void> scheduleRestartAsync() {
+		return this.ofInstance.invoke("scheduleRestart").thenAccept(result -> {
+		});
+	}
+
+	public void scheduleRestart() {
+		runSync(scheduleRestartAsync());
+	}
+
+	public CompletionStage<JsonObject> sendApplicationLogAsync() {
+		return this.ofInstance.invoke("sendApplicationLog").thenApply(r -> {
+			return r.getResultAsJsonObject();
+		});
+	}
+	
+	public JsonObject sendApplicationLog() {
+		return runSync(this.sendApplicationLogAsync());
+	}
+
+	public CompletionStage<Void> setAppLogUsernameAsync(String username) {
+		return this.ofInstance.invoke("setAppLogUsername", Json.createValue(username)).thenAccept(result -> {
+		});
+	}
+
+	public void setAppLogUsername(String username) {
+		runSync(setAppLogUsernameAsync(username));
+	}
+
+	public CompletionStage<Void> setShortcutsAsync(JsonObject config) {
+		return this.ofInstance.invoke("setShortcuts", config).thenAccept(result -> {
+		});
+	}
+
+	public void setShortcuts(JsonObject config) {
+		runSync(setShortcutsAsync(config));
+	}
+
+	public CompletionStage<Void> setTrayIconAsync(String icon) {
+		return this.ofInstance.invoke("setTrayIcon", Json.createValue(icon)).thenAccept(result -> {
+		});
+	}
+
+	public void setTrayIcon(String icon) {
+		runSync(setTrayIconAsync(icon));
 	}
 
 
