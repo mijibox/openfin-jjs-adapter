@@ -19,7 +19,9 @@ public class OfPlatform extends OfObject {
 
 	public static CompletionStage<OfPlatform> startFromManifestAsync(OpenFinGateway gateway, String manifestUrl,
 			JsonObject rvmLaunchOptions) {
-		return gateway.invoke(true, "fin.Platform.startFromManifest", Json.createValue(manifestUrl), rvmLaunchOptions)
+		return gateway
+				.invoke(true, "fin.Platform.startFromManifest", Json.createValue(manifestUrl),
+						rvmLaunchOptions == null ? JsonValue.EMPTY_JSON_OBJECT : rvmLaunchOptions)
 				.thenApply(r -> {
 					return new OfPlatform(r.getProxyObject());
 				});
@@ -27,7 +29,7 @@ public class OfPlatform extends OfObject {
 
 	public static OfPlatform startFromManifest(OpenFinGateway gateway, String manifestUrl,
 			JsonObject rvmLaunchOptions) {
-		return runSync(startFromManifestAsync(gateway, manifestUrl, rvmLaunchOptions == null ? JsonValue.EMPTY_JSON_OBJECT : rvmLaunchOptions));
+		return runSync(startFromManifestAsync(gateway, manifestUrl, rvmLaunchOptions));
 	}
 
 	public static CompletionStage<OfPlatform> startAsync(OpenFinGateway gateway, JsonObject platformOptions) {
@@ -105,7 +107,7 @@ public class OfPlatform extends OfObject {
 	public JsonObject getSnapshot() {
 		return runSync(getSnapshotAsync());
 	}
-	
+
 	public CompletionStage<Void> quitAsync() {
 		return this.ofInstance.invoke("quit").thenAccept(r -> {
 		});
@@ -121,7 +123,7 @@ public class OfPlatform extends OfObject {
 					return this;
 				});
 	}
-	
+
 	public OfPlatform applySnapshot(JsonObject requestedSnapshot, JsonObject options) {
 		return runSync(applySnapshotAsync(requestedSnapshot, options));
 	}
@@ -132,10 +134,9 @@ public class OfPlatform extends OfObject {
 					return this;
 				});
 	}
-	
+
 	public OfPlatform applySnapshot(String snapshotUrl, JsonObject options) {
 		return runSync(applySnapshotAsync(snapshotUrl, options));
 	}
-
 
 }
