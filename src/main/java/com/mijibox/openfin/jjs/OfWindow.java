@@ -339,4 +339,59 @@ public class OfWindow extends OfObject {
 		runSync(this.hideAsync());
 	}
 	
+	public CompletionStage<Void> animateAsync(JsonObject transitions, JsonObject options) {
+		return this.ofInstance.invoke("animate", transitions, options).thenAccept(r -> {
+		});
+	}
+
+	public void animate(JsonObject transitions, JsonObject options) {
+		runSync(this.animateAsync(transitions, options));
+	}
+	
+	public CompletionStage<Void> authenticateAsync(String userName, String password) {
+		return this.ofInstance.invoke("authenticate", Json.createValue(userName), Json.createValue(password)).thenAccept(r -> {
+		});
+	}
+
+	public void authenticate(String userName, String password) {
+		runSync(this.authenticateAsync(userName, password));
+	}
+	
+	public CompletionStage<Void> disableUserMovementAsync() {
+		return this.ofInstance.invoke("disableUserMovement").thenAccept(r -> {
+		});
+	}
+
+	public void disableUserMovement() {
+		runSync(this.disableUserMovementAsync());
+	}
+	
+	public CompletionStage<Void> enableUserMovementAsync() {
+		return this.ofInstance.invoke("enableUserMovement").thenAccept(r -> {
+		});
+	}
+
+	public void enableUserMovement() {
+		runSync(this.enableUserMovementAsync());
+	}
+	
+	public CompletionStage<Void> executeJavaScriptAsync(String code) {
+		return this.ofInstance.invoke("executeJavaScript", Json.createValue(code)).thenAccept(r -> {
+		});
+	}
+
+	public void executeJavaScript(String code) {
+		runSync(this.executeJavaScriptAsync(code));
+	}
+	
+	public CompletionStage<JsonObject> findInPageAsync(String searchTerm, JsonObject options) {
+		return this.ofInstance.invoke("findInPage", Json.createValue(searchTerm), options).thenApply(r ->{
+			return r.getResultAsJsonObject();
+		});
+	}
+
+	public JsonObject findInPage(String searchTerm, JsonObject options) {
+		return runSync(this.findInPageAsync(searchTerm, options));
+	}
+	
 }

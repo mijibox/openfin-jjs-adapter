@@ -363,7 +363,8 @@ public class OfSystem {
 		return runSync(getMinLogLevelAsync(gateway));
 	}
 
-	public static CompletionStage<JsonObject> getServiceConfigurationAsync(OpenFinGateway gateway, JsonObject serviceIdentifier) {
+	public static CompletionStage<JsonObject> getServiceConfigurationAsync(OpenFinGateway gateway,
+			JsonObject serviceIdentifier) {
 		return gateway.invoke("fin.System.getServiceConfiguration", serviceIdentifier).thenApply(r -> {
 			return r.getResultAsJsonObject();
 		});
@@ -382,7 +383,7 @@ public class OfSystem {
 	public static JsonObject launchExternalProcess(OpenFinGateway gateway, JsonObject options) {
 		return runSync(launchExternalProcessAsync(gateway, options));
 	}
-	
+
 	public static CompletionStage<JsonObject> logAsync(OpenFinGateway gateway, String level, String message) {
 		return gateway.invoke("fin.System.log", Json.createValue(level), Json.createValue(message))
 				.thenApply(r -> {
@@ -394,6 +395,107 @@ public class OfSystem {
 		return runSync(logAsync(gateway, level, message));
 	}
 
+	public static CompletionStage<JsonObject> readRegistryValueAsync(OpenFinGateway gateway, String rootKey,
+			String subkey, String value) {
+		return gateway
+				.invoke("fin.System.readRegistryValue", Json.createValue(rootKey), Json.createValue(subkey),
+						Json.createValue(value))
+				.thenApply(r -> {
+					return r.getResultAsJsonObject();
+				});
+	}
 
+	public static JsonObject readRegistryValue(OpenFinGateway gateway, String rootKey, String subkey, String value) {
+		return runSync(readRegistryValueAsync(gateway, rootKey, subkey, value));
+	}
 
+	public static CompletionStage<JsonObject> registerExternalConnectionAsync(OpenFinGateway gateway, String uuid) {
+		return gateway.invoke("fin.System.registerExternalConnection", Json.createValue(uuid)).thenApply(r -> {
+			return r.getResultAsJsonObject();
+		});
+	}
+
+	public static JsonObject registerExternalConnection(OpenFinGateway gateway, String uuid) {
+		return runSync(registerExternalConnectionAsync(gateway, uuid));
+	}
+
+	public static CompletionStage<Void> releaseExternalProcessAsync(OpenFinGateway gateway, String uuid) {
+		return gateway.invoke("fin.System.releaseExternalProcess", Json.createValue(uuid)).thenAccept(r -> {
+
+		});
+	}
+
+	public static void releaseExternalProcess(OpenFinGateway gateway, String uuid) {
+		runSync(releaseExternalProcessAsync(gateway, uuid));
+	}
+
+	public static CompletionStage<JsonObject> resolveUuidAsync(OpenFinGateway gateway, String uuid) {
+		return gateway.invoke("fin.System.resolveUuid", Json.createValue(uuid)).thenApply(r -> {
+			return r.getResultAsJsonObject();
+		});
+	}
+
+	public static JsonObject resolveUuid(OpenFinGateway gateway, String uuid) {
+		return runSync(resolveUuidAsync(gateway, uuid));
+	}
+
+	public static CompletionStage<JsonObject> runRvmHealthCheckAsync(OpenFinGateway gateway) {
+		return gateway.invoke("fin.System.runRvmHealthCheck").thenApply(r -> {
+			return r.getResultAsJsonObject();
+		});
+	}
+
+	public static JsonObject runRvmHealthCheck(OpenFinGateway gateway) {
+		return runSync(runRvmHealthCheckAsync(gateway));
+	}
+
+	public static CompletionStage<Void> setMinLogLevelAsync(OpenFinGateway gateway, String logLevel) {
+		return gateway.invoke("fin.System.setMinLogLevel", Json.createValue(logLevel)).thenAccept(r -> {
+
+		});
+	}
+
+	public static void setMinLogLevel(OpenFinGateway gateway, String logLevel) {
+		runSync(setMinLogLevelAsync(gateway, logLevel));
+	}
+
+	public static CompletionStage<Void> showDeveloperToolsAsync(OpenFinGateway gateway, JsonObject identity) {
+		return gateway.invoke("fin.System.showDeveloperTools", identity).thenAccept(r -> {
+
+		});
+	}
+
+	public static void showDeveloperTools(OpenFinGateway gateway, JsonObject identity) {
+		runSync(showDeveloperToolsAsync(gateway, identity));
+	}
+
+	public static CompletionStage<JsonObject> startCrashReporterAsync(OpenFinGateway gateway, JsonObject options) {
+		return gateway.invoke("fin.System.startCrashReporter", options).thenApply(r -> {
+			return r.getResultAsJsonObject();
+		});
+	}
+
+	public static JsonObject startCrashReporter(OpenFinGateway gateway, JsonObject options) {
+		return runSync(startCrashReporterAsync(gateway, options));
+	}
+
+	public static CompletionStage<Void> terminateExternalProcessAsync(OpenFinGateway gateway, JsonObject options) {
+		return gateway.invoke("fin.System.terminateExternalProcess", options).thenAccept(r -> {
+
+		});
+	}
+
+	public static void terminateExternalProcess(OpenFinGateway gateway, JsonObject options) {
+		runSync(terminateExternalProcessAsync(gateway, options));
+	}
+
+	public static CompletionStage<Void> updateProxySettingsAsync(OpenFinGateway gateway, JsonObject options) {
+		return gateway.invoke("fin.System.updateProxySettings", options).thenAccept(r -> {
+
+		});
+	}
+
+	public static void updateProxySettings(OpenFinGateway gateway, JsonObject options) {
+		runSync(updateProxySettingsAsync(gateway, options));
+	}
 }

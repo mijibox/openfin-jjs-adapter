@@ -278,4 +278,16 @@ public class WindowTest {
 		assertTrue(isShowingAfterShow);
 	}
 
+	@Test
+	public void findInPage() throws Exception {
+		OfWindow win = OfWindow.create(gateway, Json.createObjectBuilder()
+				.add("name", UUID.randomUUID().toString())
+				.add("url", "https://www.google.com")
+				.build());
+		
+		JsonObject result = win.findInPage("google", null);
+		win.close(true);
+		assertNotNull(result);
+	}
+
 }
