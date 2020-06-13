@@ -16,7 +16,7 @@ import com.mijibox.openfin.gateway.OpenFinGateway;
 
 public class OfClipboard {
 	public static CompletionStage<List<String>> getAvailableFormatsAsync(OpenFinGateway gateway, String type) {
-		JsonValue typeJson = type == null ? null : Json.createValue(type);
+		JsonValue typeJson = type == null ? JsonValue.EMPTY_JSON_OBJECT : Json.createValue(type);
 		return gateway.invoke("fin.Clipboard.getAvailableFormats", typeJson).thenApply(r -> {
 			JsonArray f = r.getResultAsJsonArray();
 			ArrayList<String> formats = new ArrayList<>();
@@ -32,7 +32,7 @@ public class OfClipboard {
 	}
 
 	public static CompletionStage<String> readHtmlAsync(OpenFinGateway gateway, String type) {
-		JsonValue typeJson = type == null ? null : Json.createValue(type);
+		JsonValue typeJson = type == null ? JsonValue.EMPTY_JSON_OBJECT : Json.createValue(type);
 		return gateway.invoke("fin.Clipboard.readHtml", typeJson).thenApply(r -> {
 			return r.getResultAsString();
 		});
@@ -69,7 +69,7 @@ public class OfClipboard {
 	}
 
 	public static CompletionStage<String> readTextAsync(OpenFinGateway gateway, String type) {
-		JsonValue typeJson = type == null ? null : Json.createValue(type);
+		JsonValue typeJson = type == null ? JsonValue.EMPTY_JSON_OBJECT : Json.createValue(type);
 		return gateway.invoke("fin.Clipboard.readText", typeJson).thenApply(r -> {
 			return r.getResultAsString();
 		});
@@ -93,7 +93,7 @@ public class OfClipboard {
 	}
 
 	public static CompletionStage<String> readRtfAsync(OpenFinGateway gateway, String type) {
-		JsonValue typeJson = type == null ? null : Json.createValue(type);
+		JsonValue typeJson = type == null ? JsonValue.EMPTY_JSON_OBJECT : Json.createValue(type);
 		return gateway.invoke("fin.Clipboard.readRtf", typeJson).thenApply(r -> {
 			return r.getResultAsString();
 		});

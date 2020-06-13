@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mijibox.openfin.gateway.OpenFinGateway;
+import com.mijibox.openfin.gateway.OpenFinGatewayLauncher;
 import com.mijibox.openfin.gateway.OpenFinLauncher;
 
 public class ExternalApplicationTest {
@@ -26,8 +28,17 @@ public class ExternalApplicationTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		gateway = OpenFinLauncher.newOpenFinLauncherBuilder().runtimeVersion("stable").open(null).toCompletableFuture()
-				.get();
+		gateway = OpenFinGatewayLauncher.newOpenFinGatewayLauncher()
+				.launcherBuilder(OpenFinLauncher.newOpenFinLauncherBuilder()
+						.runtimeVersion("stable")
+						.addRuntimeOption("--v=1")
+						.addRuntimeOption("--no-sandbox"))
+				.open()
+				.exceptionally(e -> {
+					e.printStackTrace();
+					return null;
+				})
+				.toCompletableFuture().get(120, TimeUnit.SECONDS);
 	}
 
 	@AfterClass

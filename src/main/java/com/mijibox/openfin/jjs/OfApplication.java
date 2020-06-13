@@ -33,7 +33,7 @@ public class OfApplication extends OfObject {
 
 	public static CompletionStage<OfApplication> startFromManifestAsync(OpenFinGateway gateway, String manifestUrl, JsonObject rvmOptions) {
 		return gateway.invoke(true, "fin.Application.startFromManifest",
-				Json.createValue(manifestUrl), rvmOptions).thenApply(r -> {
+				Json.createValue(manifestUrl), rvmOptions == null ? JsonValue.EMPTY_JSON_OBJECT : rvmOptions).thenApply(r -> {
 					return new OfApplication(r.getProxyObject());
 				});
 	}

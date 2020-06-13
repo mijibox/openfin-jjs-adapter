@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mijibox.openfin.gateway.OpenFinGateway;
+import com.mijibox.openfin.gateway.OpenFinGatewayLauncher;
 import com.mijibox.openfin.gateway.OpenFinLauncher;
 import com.mijibox.openfin.gateway.ProxyObject;
 
@@ -36,11 +37,18 @@ public class WindowTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		System.setProperty("com.mijibox.openfin.gateway.showConsole", "true");
-		gateway = OpenFinLauncher.newOpenFinLauncherBuilder()
-				.licenseKey("JavaAdapterJunitTests")
-				.runtimeVersion(RUNTIME_VERSION).open(null)
-				.toCompletableFuture()
-				.get();
+		gateway = OpenFinGatewayLauncher.newOpenFinGatewayLauncher()
+				.launcherBuilder(OpenFinLauncher.newOpenFinLauncherBuilder()
+						.licenseKey("JavaAdapterJunitTests")
+						.runtimeVersion(RUNTIME_VERSION)
+						.addRuntimeOption("--v=1")
+						.addRuntimeOption("--no-sandbox"))
+				.open()
+				.exceptionally(e -> {
+					e.printStackTrace();
+					return null;
+				})
+				.toCompletableFuture().get(120, TimeUnit.SECONDS);
 	}
 
 	@AfterClass

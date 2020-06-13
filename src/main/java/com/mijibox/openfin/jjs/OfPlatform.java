@@ -6,6 +6,7 @@ import java.util.concurrent.CompletionStage;
 
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 
 import com.mijibox.openfin.gateway.OpenFinGateway;
 import com.mijibox.openfin.gateway.ProxyObject;
@@ -26,7 +27,7 @@ public class OfPlatform extends OfObject {
 
 	public static OfPlatform startFromManifest(OpenFinGateway gateway, String manifestUrl,
 			JsonObject rvmLaunchOptions) {
-		return runSync(startFromManifestAsync(gateway, manifestUrl, rvmLaunchOptions));
+		return runSync(startFromManifestAsync(gateway, manifestUrl, rvmLaunchOptions == null ? JsonValue.EMPTY_JSON_OBJECT : rvmLaunchOptions));
 	}
 
 	public static CompletionStage<OfPlatform> startAsync(OpenFinGateway gateway, JsonObject platformOptions) {
