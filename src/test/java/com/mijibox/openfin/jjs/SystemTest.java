@@ -13,6 +13,7 @@ import javax.json.JsonObject;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -159,6 +160,7 @@ public class SystemTest {
 		OfSystem.clearCache(gateway, null);
 	}
 
+	@Ignore
 	@Test
 	public void downloadRuntime() throws Exception {
 		OfSystem.downloadRuntimeAsync(gateway, Json.createObjectBuilder().add("version", "13.76.45.14").build(), e -> {

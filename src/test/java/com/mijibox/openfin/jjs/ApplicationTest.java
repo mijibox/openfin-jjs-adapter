@@ -189,6 +189,7 @@ public class ApplicationTest {
 				.build();
 		OfApplication app = OfApplication.start(gateway, appOpts);
 		app.setZoomLevel(zoomLevel);
+		Thread.sleep(500); //openfin issue, it doesn't get zoom value updated right away.
 		double gotZoomLevel = app.getZoomLevel();
 		app.quit(true);
 		logger.debug("gotZoomLevel: {}", gotZoomLevel);

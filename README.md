@@ -1,5 +1,5 @@
 # OpenFin Java-JavaScript Adapter
-OpenFin Java-JavaScript Adapter using OpenFin Java Gateway
+OpenFin Java-JavaScript Adapter using [OpenFin Java Gateway](https://github.com/mijibox/openfin-java-gateway)
 
 Almost all OpenFin JavaScript v2 API are implemented. Whatever marked as "EXPERIMENTAL" were not implemented.
 
