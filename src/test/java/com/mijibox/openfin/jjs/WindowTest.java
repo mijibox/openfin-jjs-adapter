@@ -298,4 +298,133 @@ public class WindowTest {
 		assertNotNull(result);
 	}
 
+	@Test
+	public void showDeveloperTools() throws Exception {
+		OfWindow win = OfWindow.create(gateway, Json.createObjectBuilder()
+				.add("name", UUID.randomUUID().toString())
+				.add("url", "https://www.google.com")
+				.build());
+		
+		win.showDeveloperTools();
+		win.close(true);
+	}
+
+	@Test
+	public void getGroup() throws Exception {
+		OfWindow win = OfWindow.create(gateway, Json.createObjectBuilder()
+				.add("name", UUID.randomUUID().toString())
+				.add("url", "https://www.google.com")
+				.build());
+		
+		JsonArray group = win.getGroup();
+		logger.debug("getGroup(): ", group);
+		win.close(true);
+		assertNotNull(group);
+	}
+
+	@Test
+	public void moveBy() throws Exception {
+		OfWindow win = OfWindow.create(gateway, Json.createObjectBuilder()
+				.add("name", UUID.randomUUID().toString())
+				.add("url", "https://www.google.com")
+				.build());
+		
+		win.moveBy(500, 250, null);
+		win.close(true);
+	}
+
+	@Test
+	public void moveTo() throws Exception {
+		OfWindow win = OfWindow.create(gateway, Json.createObjectBuilder()
+				.add("name", UUID.randomUUID().toString())
+				.add("url", "https://www.google.com")
+				.build());
+		
+		win.moveTo(800, 400, null);
+		win.close(true);
+	}
+
+	@Test
+	public void resizeBy() throws Exception {
+		OfWindow win = OfWindow.create(gateway, Json.createObjectBuilder()
+				.add("name", UUID.randomUUID().toString())
+				.add("url", "https://www.google.com")
+				.build());
+		
+		win.resizeBy(500, 250, null, null);
+		win.close(true);
+	}
+
+	@Test
+	public void resizeTo() throws Exception {
+		OfWindow win = OfWindow.create(gateway, Json.createObjectBuilder()
+				.add("name", UUID.randomUUID().toString())
+				.add("url", "https://www.google.com")
+				.build());
+		
+		win.resizeTo(800, 400, null, null);
+		win.close(true);
+	}
+
+	@Test
+	public void setAsForeground() throws Exception {
+		OfWindow win = OfWindow.create(gateway, Json.createObjectBuilder()
+				.add("name", UUID.randomUUID().toString())
+				.add("url", "https://www.google.com")
+				.build());
+		
+		win.setAsForeground();
+		win.close(true);
+	}
+
+	@Test
+	public void setBounds() throws Exception {
+		OfWindow win = OfWindow.create(gateway, Json.createObjectBuilder()
+				.add("name", UUID.randomUUID().toString())
+				.add("url", "https://www.google.com")
+				.build());
+		
+		win.setBounds(Json.createObjectBuilder()
+				.add("top", 150)
+				.add("left", 300)
+				.add("width", 800)
+				.add("height", 600)
+				.build(), null);
+		win.close(true);
+	}
+
+	@Test
+	public void showAt() throws Exception {
+		OfWindow win = OfWindow.create(gateway, Json.createObjectBuilder()
+				.add("name", UUID.randomUUID().toString())
+				.add("url", "https://www.google.com")
+				.add("autoShow", false)
+				.build());
+		
+		win.showAt(500, 250, true, null);
+		win.close(true);
+	}
+
+	@Test
+	public void updateOptions() throws Exception {
+		CompletableFuture<?> errorFuture = new CompletableFuture<>();
+		OfWindow win = OfWindow.create(gateway, Json.createObjectBuilder()
+				.add("name", UUID.randomUUID().toString())
+				.add("url", "https://www.google.com")
+				.build());
+		
+		win.updateOptionsAsync(Json.createObjectBuilder().add("maxWidth", 200).build())
+		.thenAccept(v->{
+			win.resizeTo(500, 300, null, null);
+		})
+		.exceptionally(e->{
+			logger.debug("expected error", e);
+			win.close(true);
+			errorFuture.complete(null);
+			return null;
+		});
+		
+		errorFuture.get(5, TimeUnit.SECONDS);
+	}
+
 }

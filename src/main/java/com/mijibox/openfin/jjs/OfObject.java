@@ -13,7 +13,7 @@ import com.mijibox.openfin.gateway.ProxyObject;
 public class OfObject {
 	protected ProxyObject ofInstance;
 
-	OfObject(ProxyObject obj) {
+	protected OfObject(ProxyObject obj) {
 		this.ofInstance = obj;
 	}
 

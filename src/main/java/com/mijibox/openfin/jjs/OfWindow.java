@@ -12,7 +12,7 @@ import javax.json.JsonValue;
 import com.mijibox.openfin.gateway.OpenFinGateway;
 import com.mijibox.openfin.gateway.ProxyObject;
 
-public class OfWindow extends OfObject {
+public class OfWindow extends OfWebContent {
 
 	OfWindow(ProxyObject obj) {
 		super(obj);
@@ -38,33 +38,6 @@ public class OfWindow extends OfObject {
 		return runSync(wrapAsync(gateway, identity));
 	}
 
-	public CompletionStage<Void> navigateAsync(String url) {
-		return this.ofInstance.invoke("navigate", Json.createValue(url)).thenAccept(r -> {
-		});
-	}
-
-	public void navigate(String url) {
-		runSync(navigateAsync(url));
-	}
-
-	public CompletionStage<Void> navigateBackAsync() {
-		return this.ofInstance.invoke("navigateBack").thenAccept(r -> {
-		});
-	}
-
-	public void navigateBack() {
-		runSync(navigateBackAsync());
-	}
-
-	public CompletionStage<Void> navigateForwardAsync() {
-		return this.ofInstance.invoke("navigateForward").thenAccept(r -> {
-		});
-	}
-
-	public void navigateForward() {
-		runSync(navigateForwardAsync());
-	}
-
 	public CompletionStage<Void> closeAsync(boolean force) {
 		return this.ofInstance.invoke("close", force ? JsonValue.TRUE : JsonValue.FALSE).thenAccept(r -> {
 		});
@@ -73,7 +46,7 @@ public class OfWindow extends OfObject {
 	public void close(boolean force) {
 		runSync(this.closeAsync(force));
 	}
-	
+
 	public CompletionStage<Void> flashAsync() {
 		return this.ofInstance.invoke("flash").thenAccept(r -> {
 		});
@@ -82,7 +55,7 @@ public class OfWindow extends OfObject {
 	public void flash() {
 		runSync(this.flashAsync());
 	}
-	
+
 	public CompletionStage<Void> stopFlashingAsync() {
 		return this.ofInstance.invoke("stopFlashing").thenAccept(r -> {
 		});
@@ -91,25 +64,7 @@ public class OfWindow extends OfObject {
 	public void stopFlashing() {
 		runSync(this.stopFlashingAsync());
 	}
-	
-	public CompletionStage<Void> stopNavigationAsync() {
-		return this.ofInstance.invoke("stopNavigation").thenAccept(r -> {
-		});
-	}
 
-	public void stopNavigation() {
-		runSync(this.stopNavigationAsync());
-	}
-	
-	public CompletionStage<Void> reloadAsync() {
-		return this.ofInstance.invoke("reload").thenAccept(r -> {
-		});
-	}
-
-	public void reload() {
-		runSync(this.reloadAsync());
-	}
-	
 	public CompletionStage<Void> maximizeAsync() {
 		return this.ofInstance.invoke("maximize").thenAccept(r -> {
 		});
@@ -118,7 +73,7 @@ public class OfWindow extends OfObject {
 	public void maximize() {
 		runSync(this.maximizeAsync());
 	}
-	
+
 	public CompletionStage<Void> minimizeAsync() {
 		return this.ofInstance.invoke("minimize").thenAccept(r -> {
 		});
@@ -127,7 +82,7 @@ public class OfWindow extends OfObject {
 	public void minimize() {
 		runSync(this.minimizeAsync());
 	}
-	
+
 	public CompletionStage<Void> restoreAsync() {
 		return this.ofInstance.invoke("restore").thenAccept(r -> {
 		});
@@ -136,7 +91,7 @@ public class OfWindow extends OfObject {
 	public void restore() {
 		runSync(this.restoreAsync());
 	}
-	
+
 	public CompletionStage<String> getStateAsync() {
 		return this.ofInstance.invoke("getState").thenApply(r -> {
 			return r.getResultAsString();
@@ -146,18 +101,7 @@ public class OfWindow extends OfObject {
 	public String getState() {
 		return runSync(this.getStateAsync());
 	}
-	
 
-	
-	public CompletionStage<Void> focusAsync() {
-		return this.ofInstance.invoke("focus").thenAccept(r -> {
-		});
-	}
-
-	public void focus() {
-		runSync(this.focusAsync());
-	}
-	
 	public CompletionStage<Void> blurAsync() {
 		return this.ofInstance.invoke("blur").thenAccept(r -> {
 		});
@@ -166,7 +110,7 @@ public class OfWindow extends OfObject {
 	public void blur() {
 		runSync(this.blurAsync());
 	}
-	
+
 	public CompletionStage<Void> bringToFrontAsync() {
 		return this.ofInstance.invoke("bringToFront").thenAccept(r -> {
 		});
@@ -175,7 +119,7 @@ public class OfWindow extends OfObject {
 	public void bringToFront() {
 		runSync(this.bringToFrontAsync());
 	}
-	
+
 	public CompletionStage<Void> centerAsync() {
 		return this.ofInstance.invoke("center").thenAccept(r -> {
 		});
@@ -184,7 +128,7 @@ public class OfWindow extends OfObject {
 	public void center() {
 		runSync(this.centerAsync());
 	}
-	
+
 	public CompletionStage<JsonArray> getAllFramesAsync() {
 		return this.ofInstance.invoke("getAllFrames").thenApply(r -> {
 			return r.getResultAsJsonArray();
@@ -194,7 +138,7 @@ public class OfWindow extends OfObject {
 	public JsonArray getAllFrames() {
 		return runSync(this.getAllFramesAsync());
 	}
-	
+
 	public CompletionStage<JsonObject> getBoundsAsync() {
 		return this.ofInstance.invoke("getBounds").thenApply(r -> {
 			return r.getResultAsJsonObject();
@@ -204,7 +148,7 @@ public class OfWindow extends OfObject {
 	public JsonObject getBounds() {
 		return runSync(this.getBoundsAsync());
 	}
-	
+
 	public CompletionStage<JsonObject> getInfoAsync() {
 		return this.ofInstance.invoke("getInfo").thenApply(r -> {
 			return r.getResultAsJsonObject();
@@ -214,17 +158,7 @@ public class OfWindow extends OfObject {
 	public JsonObject getInfo() {
 		return runSync(this.getInfoAsync());
 	}
-	
-	public CompletionStage<JsonArray> getPrintersAsync() {
-		return this.ofInstance.invoke("getPrinters").thenApply(r -> {
-			return r.getResultAsJsonArray();
-		});
-	}
 
-	public JsonArray getPrinters() {
-		return runSync(this.getPrintersAsync());
-	}
-	
 	public CompletionStage<JsonObject> getOptionsAsync() {
 		return this.ofInstance.invoke("getOptions").thenApply(r -> {
 			return r.getResultAsJsonObject();
@@ -234,7 +168,7 @@ public class OfWindow extends OfObject {
 	public JsonObject getOptions() {
 		return runSync(this.getOptionsAsync());
 	}
-	
+
 	public CompletionStage<String> getNativeIdAsync() {
 		return this.ofInstance.invoke("getNativeId").thenApply(r -> {
 			return r.getResultAsString();
@@ -244,9 +178,9 @@ public class OfWindow extends OfObject {
 	public String getNativeId() {
 		return runSync(this.getNativeIdAsync());
 	}
-	
+
 	public CompletionStage<String> getSnapshotAsync(JsonObject area) {
-		JsonValue[] args = (area == null ? (JsonValue[]) null : new JsonValue[] {area});
+		JsonValue[] args = (area == null ? (JsonValue[]) null : new JsonValue[] { area });
 		return this.ofInstance.invoke("getSnapshot", args).thenApply(r -> {
 			return r.getResultAsString();
 		});
@@ -255,7 +189,7 @@ public class OfWindow extends OfObject {
 	public String getSnapshot(JsonObject area) {
 		return runSync(this.getSnapshotAsync(area));
 	}
-	
+
 	public CompletionStage<OfApplication> getParentApplicationAsync() {
 		return this.ofInstance.invoke(true, "getParentApplication").thenApply(r -> {
 			return new OfApplication(r.getProxyObject());
@@ -265,7 +199,7 @@ public class OfWindow extends OfObject {
 	public OfApplication getParentApplication() {
 		return runSync(this.getParentApplicationAsync());
 	}
-	
+
 	public CompletionStage<OfWindow> getParentWindowAsync() {
 		return this.ofInstance.invoke(true, "getParentWindow").thenApply(r -> {
 			return new OfWindow(r.getProxyObject());
@@ -275,7 +209,7 @@ public class OfWindow extends OfObject {
 	public OfWindow getParentWindow() {
 		return runSync(this.getParentWindowAsync());
 	}
-	
+
 	public CompletionStage<Boolean> isMainWindowAsync() {
 		return this.ofInstance.invoke("isMainWindow").thenApply(r -> {
 			return r.getResultAsBoolean();
@@ -285,7 +219,7 @@ public class OfWindow extends OfObject {
 	public Boolean isMainWindow() {
 		return runSync(this.isMainWindowAsync());
 	}
-	
+
 	public CompletionStage<Boolean> isShowingAsync() {
 		return this.ofInstance.invoke("isShowing").thenApply(r -> {
 			return r.getResultAsBoolean();
@@ -295,32 +229,7 @@ public class OfWindow extends OfObject {
 	public Boolean isShowing() {
 		return runSync(this.isShowingAsync());
 	}
-	
-	public CompletionStage<Void> setZoomLevelAsync(double zoomLevel) {
-		return this.ofInstance.invoke("setZoomLevel", Json.createValue(zoomLevel)).thenAccept(r -> {
-		});
-	}
-	
-	public void setZoomLevel(double zoomLevel) {
-		runSync(this.setZoomLevelAsync(zoomLevel));
-	}
 
-	public CompletionStage<Double> getZoomLevelAsync() {
-		return this.ofInstance.invoke("getZoomLevel").thenApply(r -> {
-			return r.getResultAsDouble();
-		});
-	}
-	
-	public double getZoomLevel() {
-		return runSync(this.getZoomLevelAsync());
-	}
-
-	public CompletionStage<ProxyObject> getWebWindowAsync() {
-		return this.ofInstance.invoke(true, "getWebWindow").thenApply(r -> {
-			return r.getProxyObject();
-		});
-	}
-	
 	public CompletionStage<Void> showAsync(boolean force) {
 		return this.ofInstance.invoke("show", force ? JsonValue.TRUE : JsonValue.FALSE).thenAccept(r -> {
 		});
@@ -329,7 +238,7 @@ public class OfWindow extends OfObject {
 	public void show(boolean force) {
 		runSync(this.showAsync(force));
 	}
-	
+
 	public CompletionStage<Void> hideAsync() {
 		return this.ofInstance.invoke("hide").thenAccept(r -> {
 		});
@@ -338,7 +247,7 @@ public class OfWindow extends OfObject {
 	public void hide() {
 		runSync(this.hideAsync());
 	}
-	
+
 	public CompletionStage<Void> animateAsync(JsonObject transitions, JsonObject options) {
 		return this.ofInstance.invoke("animate", transitions, options).thenAccept(r -> {
 		});
@@ -347,16 +256,17 @@ public class OfWindow extends OfObject {
 	public void animate(JsonObject transitions, JsonObject options) {
 		runSync(this.animateAsync(transitions, options));
 	}
-	
+
 	public CompletionStage<Void> authenticateAsync(String userName, String password) {
-		return this.ofInstance.invoke("authenticate", Json.createValue(userName), Json.createValue(password)).thenAccept(r -> {
-		});
+		return this.ofInstance.invoke("authenticate", Json.createValue(userName), Json.createValue(password))
+				.thenAccept(r -> {
+				});
 	}
 
 	public void authenticate(String userName, String password) {
 		runSync(this.authenticateAsync(userName, password));
 	}
-	
+
 	public CompletionStage<Void> disableUserMovementAsync() {
 		return this.ofInstance.invoke("disableUserMovement").thenAccept(r -> {
 		});
@@ -365,7 +275,7 @@ public class OfWindow extends OfObject {
 	public void disableUserMovement() {
 		runSync(this.disableUserMovementAsync());
 	}
-	
+
 	public CompletionStage<Void> enableUserMovementAsync() {
 		return this.ofInstance.invoke("enableUserMovement").thenAccept(r -> {
 		});
@@ -374,24 +284,101 @@ public class OfWindow extends OfObject {
 	public void enableUserMovement() {
 		runSync(this.enableUserMovementAsync());
 	}
-	
-	public CompletionStage<Void> executeJavaScriptAsync(String code) {
-		return this.ofInstance.invoke("executeJavaScript", Json.createValue(code)).thenAccept(r -> {
+
+	public CompletionStage<JsonArray> getGroupAsync() {
+		return this.ofInstance.invoke("getGroup").thenApply(r -> {
+			return r.getResultAsJsonArray();
 		});
 	}
 
-	public void executeJavaScript(String code) {
-		runSync(this.executeJavaScriptAsync(code));
+	public JsonArray getGroup() {
+		return runSync(this.getGroupAsync());
 	}
-	
-	public CompletionStage<JsonObject> findInPageAsync(String searchTerm, JsonObject options) {
-		return this.ofInstance.invoke("findInPage", Json.createValue(searchTerm), options).thenApply(r ->{
-			return r.getResultAsJsonObject();
+
+	public CompletionStage<Void> leaveGroupAsync() {
+		return this.ofInstance.invoke("leaveGroup").thenAccept(r -> {
 		});
 	}
 
-	public JsonObject findInPage(String searchTerm, JsonObject options) {
-		return runSync(this.findInPageAsync(searchTerm, options));
+	public void leaveGroup() {
+		runSync(this.leaveGroupAsync());
 	}
-	
+
+	public CompletionStage<Void> moveByAsync(int deltaLeft, int deltaTop, JsonObject options) {
+		return this.ofInstance.invoke("moveBy", Json.createValue(deltaLeft), Json.createValue(deltaTop), options)
+				.thenAccept(r -> {
+				});
+	}
+
+	public void moveBy(int deltaLeft, int deltaTop, JsonObject options) {
+		runSync(this.moveByAsync(deltaLeft, deltaTop, options));
+	}
+
+	public CompletionStage<Void> moveToAsync(int left, int top, JsonObject options) {
+		return this.ofInstance.invoke("moveTo", Json.createValue(left), Json.createValue(top), options)
+				.thenAccept(r -> {
+				});
+	}
+
+	public void moveTo(int left, int top, JsonObject options) {
+		runSync(this.moveToAsync(left, top, options));
+	}
+
+	public CompletionStage<Void> resizeByAsync(int deltaWidth, int deltaHeight, String anchor, JsonObject options) {
+		return this.ofInstance.invoke("resizeBy", Json.createValue(deltaWidth), Json.createValue(deltaHeight),
+				anchor == null ? null : Json.createValue(anchor), options).thenAccept(r -> {
+				});
+	}
+
+	public void resizeBy(int deltaWidth, int deltaHeight, String anchor, JsonObject options) {
+		runSync(this.resizeByAsync(deltaWidth, deltaHeight, anchor, options));
+	}
+
+	public CompletionStage<Void> resizeToAsync(int width, int height, String anchor, JsonObject options) {
+		return this.ofInstance.invoke("resizeTo", Json.createValue(width), Json.createValue(height),
+				anchor == null ? null : Json.createValue(anchor), options).thenAccept(r -> {
+				});
+	}
+
+	public void resizeTo(int width, int height, String anchor, JsonObject options) {
+		runSync(this.resizeToAsync(width, height, anchor, options));
+	}
+
+	public CompletionStage<Void> setAsForegroundAsync() {
+		return this.ofInstance.invoke("setAsForeground").thenAccept(r -> {
+		});
+	}
+
+	public void setAsForeground() {
+		runSync(this.setAsForegroundAsync());
+	}
+
+	public CompletionStage<Void> setBoundsAsync(JsonObject bounds, JsonObject options) {
+		return this.ofInstance.invoke("setBounds", bounds, options).thenAccept(r -> {
+		});
+	}
+
+	public void setBounds(JsonObject bounds, JsonObject options) {
+		runSync(this.setBoundsAsync(bounds, options));
+	}
+
+	public CompletionStage<Void> showAtAsync(int left, int top, boolean force, JsonObject options) {
+		return this.ofInstance.invoke("showAt", Json.createValue(left), Json.createValue(top),
+				force ? JsonValue.TRUE : JsonValue.FALSE, options).thenAccept(r -> {
+				});
+	}
+
+	public void showAt(int left, int top, boolean force, JsonObject options) {
+		runSync(this.showAtAsync(left, top, force, options));
+	}
+
+	public CompletionStage<Void> updateOptionsAsync(JsonObject options) {
+		return this.ofInstance.invoke("updateOptions", options).thenAccept(r -> {
+		});
+	}
+
+	public void updateOptions(JsonObject options) {
+		runSync(this.updateOptionsAsync(options));
+	}
+
 }

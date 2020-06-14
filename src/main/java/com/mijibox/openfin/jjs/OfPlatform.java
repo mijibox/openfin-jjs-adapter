@@ -20,8 +20,7 @@ public class OfPlatform extends OfObject {
 	public static CompletionStage<OfPlatform> startFromManifestAsync(OpenFinGateway gateway, String manifestUrl,
 			JsonObject rvmLaunchOptions) {
 		return gateway
-				.invoke(true, "fin.Platform.startFromManifest", Json.createValue(manifestUrl),
-						rvmLaunchOptions == null ? JsonValue.EMPTY_JSON_OBJECT : rvmLaunchOptions)
+				.invoke(true, "fin.Platform.startFromManifest", Json.createValue(manifestUrl), rvmLaunchOptions)
 				.thenApply(r -> {
 					return new OfPlatform(r.getProxyObject());
 				});
