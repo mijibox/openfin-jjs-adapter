@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.mijibox.openfin</groupId>
 	<artifactId>openfin-jjs-adapter</artifactId>
-	<version>1.0</version>
+	<version>1.1-SNAPSHOT</version>
 
 	<name>openfin-jjs-adapter</name>
 	<description>OpenFin Java-JavaScript Adapter</description>
@@ -34,7 +34,7 @@
 		<connection>scm:git:https://github.com/mijibox/openfin-jjs-adapter.git</connection>
 		<developerConnection>scm:git:https://github.com/mijibox/openfin-jjs-adapter.git</developerConnection>
 		<url>https://github.com/mijibox/openfin-jjs-adapter</url>
-		<tag>openfin-jjs-adapter-1.0</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<dependencies>
