@@ -5,11 +5,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -25,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import com.mijibox.openfin.gateway.OpenFinGateway;
 import com.mijibox.openfin.gateway.OpenFinGatewayLauncher;
 import com.mijibox.openfin.gateway.OpenFinLauncher;
-import com.mijibox.openfin.gateway.ProxyObject;
 
 public class WindowTest {
 	private final static Logger logger = LoggerFactory.getLogger(WindowTest.class);

@@ -1,6 +1,7 @@
 package com.mijibox.openfin.jjs;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -13,6 +14,7 @@ import javax.json.JsonObject;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +26,7 @@ import com.mijibox.openfin.gateway.OpenFinLauncher;
 public class ApplicationTest {
 	private final static Logger logger = LoggerFactory.getLogger(ApplicationTest.class);
 
-	private final static String RUNTIME_VERSION = "16.83.50.9";
+	private final static String RUNTIME_VERSION = "stable-v15";
 
 	private static OpenFinGateway gateway;
 
@@ -75,6 +77,115 @@ public class ApplicationTest {
 	}
 
 	@Test
+	public void startEvent() throws Exception {
+		CompletableFuture<?> startEventFuture = new CompletableFuture<>();
+		String appUuid = UUID.randomUUID().toString();
+		JsonObject appOpts = Json.createObjectBuilder()
+				.add("uuid", appUuid)
+				.add("name", appUuid)
+				.add("url", "https://www.google.com")
+				.add("autoShow", true)
+				.build();
+		OfSystem.addListener(gateway, "application-started", e -> {
+			logger.debug("e: {}", e);
+			if (appUuid.equals(e.getJsonObject(0).getString("uuid"))) {
+				startEventFuture.complete(null);
+			}
+			return null;
+		});
+		OfApplication app = OfApplication.start(gateway, appOpts);
+		assertNotNull(app);
+		app.quit(true);
+		startEventFuture.get(5, TimeUnit.SECONDS);
+	}
+
+	@Test
+	public void closeEvent() throws Exception {
+		CompletableFuture<?> closeEventFuture = new CompletableFuture<>();
+		String appUuid = UUID.randomUUID().toString();
+		JsonObject appOpts = Json.createObjectBuilder()
+				.add("uuid", appUuid)
+				.add("name", appUuid)
+				.add("url", "https://www.google.com")
+				.add("autoShow", true)
+				.build();
+		OfSystem.addListener(gateway, "application-closed", e -> {
+			logger.debug("e: {}", e);
+			if (appUuid.equals(e.getJsonObject(0).getString("uuid"))) {
+				closeEventFuture.complete(null);
+			}
+			return null;
+		});
+		OfApplication app = OfApplication.start(gateway, appOpts);
+		app.quit(true);
+		closeEventFuture.get(5, TimeUnit.SECONDS);
+	}
+
+	@Test
+	public void startEventMultiRuntime() throws Exception {
+		CompletableFuture<?> startEventFuture = new CompletableFuture<>();
+		String appUuid = UUID.randomUUID().toString();
+		JsonObject appOpts = Json.createObjectBuilder()
+				.add("uuid", appUuid)
+				.add("name", appUuid)
+				.add("url", "https://www.google.com")
+				.add("autoShow", true)
+				.build();
+		OfSystem.addListener(gateway, "application-started", e -> {
+			logger.debug("e: {}", e);
+			if (appUuid.equals(e.getJsonObject(0).getString("uuid"))) {
+				startEventFuture.complete(null);
+			}
+			startEventFuture.complete(null);
+			return null;
+		});
+		OpenFinGateway anotherGateway = OpenFinGatewayLauncher.newOpenFinGatewayLauncher()
+				.launcherBuilder(OpenFinLauncher.newOpenFinLauncherBuilder()
+						.licenseKey("OpenFinJavaGatewayJUnitTests")
+						.runtimeVersion("stable-v11")
+						.addRuntimeOption("--v=1"))
+				.open().toCompletableFuture().get(5, TimeUnit.SECONDS);
+		OfApplication app = OfApplication.start(anotherGateway, appOpts);
+		app.quit(true);
+		assertNotNull(app);
+		assertNotEquals(OfSystem.getVersion(gateway), OfSystem.getVersion(anotherGateway));
+		anotherGateway.close().toCompletableFuture().get(5, TimeUnit.SECONDS);
+		startEventFuture.get(5, TimeUnit.SECONDS);
+	}
+
+	@Test
+	public void closeEventMultiRuntime() throws Exception {
+		CompletableFuture<?> closeEventFuture = new CompletableFuture<>();
+		String appUuid = UUID.randomUUID().toString();
+		JsonObject appOpts = Json.createObjectBuilder()
+				.add("uuid", appUuid)
+				.add("name", appUuid)
+				.add("url", "https://www.google.com")
+				.add("autoShow", true)
+				.build();
+		OfSystem.addListener(gateway, "application-closed", e -> {
+			logger.debug("e: {}", e);
+			if (appUuid.equals(e.getJsonObject(0).getString("uuid"))) {
+				closeEventFuture.complete(null);
+			}
+			closeEventFuture.complete(null);
+			return null;
+		});
+		OpenFinGateway anotherGateway = OpenFinGatewayLauncher.newOpenFinGatewayLauncher()
+				.launcherBuilder(OpenFinLauncher.newOpenFinLauncherBuilder()
+						.licenseKey("OpenFinJavaGatewayJUnitTests")
+						.runtimeVersion("stable-v11")
+						.addRuntimeOption("--v=1"))
+				.open().toCompletableFuture().get(5, TimeUnit.SECONDS);
+		OfApplication app = OfApplication.start(anotherGateway, appOpts);
+		app.quit(true);
+		assertNotNull(app);
+		assertNotEquals(OfSystem.getVersion(gateway), OfSystem.getVersion(anotherGateway));
+		anotherGateway.close().toCompletableFuture().get(5, TimeUnit.SECONDS);
+		closeEventFuture.get(5, TimeUnit.SECONDS);
+	}
+
+	@Test
 	public void getWindow() throws Exception {
 		JsonObject appOpts = Json.createObjectBuilder().add("uuid", UUID.randomUUID().toString())
 				.add("url", "https://www.google.com")
@@ -105,7 +216,7 @@ public class ApplicationTest {
 				.add("autoShow", true)
 				.build();
 		OfApplication app = OfApplication.start(gateway, appOpts);
-		
+
 		OfApplication wrappedApp = OfApplication.wrap(gateway, app.getIdentity());
 		assertNotNull(wrappedApp);
 		wrappedApp.quit(true);
@@ -133,7 +244,7 @@ public class ApplicationTest {
 		assertNotNull(info);
 		app.quit(true);
 	}
-	
+
 	@Test
 	public void getManifest() throws Exception {
 		OfApplication app = OfApplication.startFromManifest(gateway,
@@ -149,7 +260,7 @@ public class ApplicationTest {
 			// openfin bug
 		}
 	}
-	
+
 	@Test
 	public void getManifestExpectedError() throws Exception {
 		CompletableFuture<?> errorFuture = new CompletableFuture<>();
@@ -158,7 +269,7 @@ public class ApplicationTest {
 				.add("autoShow", true)
 				.build();
 		OfApplication app = OfApplication.start(gateway, appOpts);
-		app.getManifestAsync().exceptionally(e->{
+		app.getManifestAsync().exceptionally(e -> {
 			logger.debug("expected error", e);
 			errorFuture.complete(null);
 			return null;
@@ -166,7 +277,7 @@ public class ApplicationTest {
 		app.quit(true);
 		errorFuture.get(10, TimeUnit.SECONDS);
 	}
-	
+
 	@Test
 	public void getParentUuid() throws Exception {
 		JsonObject appOpts = Json.createObjectBuilder().add("uuid", UUID.randomUUID().toString())
@@ -179,7 +290,7 @@ public class ApplicationTest {
 		assertNotNull(parentUuid);
 		app.quit(true);
 	}
-	
+
 	@Test
 	public void setGetZoomLevel() throws Exception {
 		double zoomLevel = 3.5;
@@ -189,13 +300,13 @@ public class ApplicationTest {
 				.build();
 		OfApplication app = OfApplication.start(gateway, appOpts);
 		app.setZoomLevel(zoomLevel);
-		Thread.sleep(500); //openfin issue, it doesn't get zoom value updated right away.
+		Thread.sleep(500); // openfin issue, it doesn't get zoom value updated right away.
 		double gotZoomLevel = app.getZoomLevel();
 		app.quit(true);
 		logger.debug("gotZoomLevel: {}", gotZoomLevel);
 		assertEquals(zoomLevel, gotZoomLevel, 0.0000001);
 	}
-	
+
 	@Test
 	public void registerUser() throws Exception {
 		JsonObject appOpts = Json.createObjectBuilder().add("uuid", UUID.randomUUID().toString())
@@ -205,6 +316,27 @@ public class ApplicationTest {
 		OfApplication app = OfApplication.start(gateway, appOpts);
 		app.registerUser("MyName", "MyAppName");
 		app.quit(true);
+	}
+
+	@Ignore
+	@Test
+	public void startFromManifestCloseEvent() throws Exception {
+		CompletableFuture<?> closeEventFuture = new CompletableFuture<>();
+		OfApplication app = OfApplication.startFromManifest(gateway, "https://cdn.openfin.co/demos/hello/app.json",
+				null);
+		app.addListener("closed", e -> {
+			closeEventFuture.complete(null);
+			return null;
+		});
+		try {
+			Thread.sleep(1000);
+			app.quit(true);
+		}
+		catch (Exception ex) {
+			logger.debug("openfin bug", ex);
+		}
+
+		closeEventFuture.get(5, TimeUnit.SECONDS);
 	}
 
 }

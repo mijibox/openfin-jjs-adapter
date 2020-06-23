@@ -1,6 +1,5 @@
 package com.mijibox.openfin.jjs;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.UUID;
@@ -22,8 +21,6 @@ import com.mijibox.openfin.gateway.OpenFinLauncher;
 public class PlatformTest {
 
 	private final static Logger logger = LoggerFactory.getLogger(PlatformTest.class);
-
-	private final static String RUNTIME_VERSION = "16.83.50.9";
 
 	private static OpenFinGateway gateway;
 

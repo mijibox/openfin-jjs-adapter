@@ -1,7 +1,6 @@
 package com.mijibox.openfin.jjs;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.UUID;

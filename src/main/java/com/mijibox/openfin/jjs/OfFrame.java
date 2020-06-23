@@ -4,7 +4,6 @@ import static com.mijibox.openfin.jjs.OfUtils.runSync;
 
 import java.util.concurrent.CompletionStage;
 
-import javax.json.Json;
 import javax.json.JsonObject;
 
 import com.mijibox.openfin.gateway.OpenFinGateway;
